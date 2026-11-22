@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>SkaiTechgh — Admin Dashboard</title>
+
+  <!-- Styles & Fonts -->
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 300: '#A5B4FC', 400: '#818CF8', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA', 800: '#3730A3', 900: '#312E81' },
+            accent: { 400: '#22D3EE', 500: '#06B6D4' }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* Extra admin-specific inline styles */
+    .admin-login-card {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .section-content {
+      display: none;
+    }
+    .section-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .toggle-switch.active {
+      background: rgba(99, 102, 241, 0.6);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .tag-pill .remove-tag {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.65rem;
+      margin-left: 0.15rem;
+    }
+    .tag-pill .remove-tag:hover {
+      opacity: 1;
+    }
+    .icon-preview {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 0.75rem;
+      font-size: 1.25rem;
+      color: #A5B4FC;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .image-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+    }
+    .image-preview-grid img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .image-preview-grid .preview-item {
+      position: relative;
+    }
+    .image-preview-grid .preview-item .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: rgba(239, 68, 68, 0.8);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .inquiry-count-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: #EF4444;
+      color: white;
+      padding: 0 4px;
+    }
+    .loading-spinner-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 0;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #64748B;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+    .settings-tab {
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: #94A3B8;
+      border: 1px solid transparent;
+    }
+    .settings-tab.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+    .settings-tab:hover:not(.active) {
+      color: #CBD5E1;
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .settings-panel {
+      display: none;
+    }
+    .settings-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .btn-edit {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+    }
+    .btn-edit:hover { background: rgba(99, 102, 241, 0.25); }
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+    }
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.25); }
+    .btn-view {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22D3EE;
+    }
+    .btn-view:hover { background: rgba(6, 182, 212, 0.25); }
+    .btn-loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-slate-200 font-sans min-h-screen">
+
+  <!-- ====================================================
+       LOGIN SCREEN
+       ==================================================== -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center px-4" style="background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute w-96 h-96 rounded-full bg-primary-600/10 -top-48 -right-48 blur-3xl"></div>
+      <div class="absolute w-72 h-72 rounded-full bg-accent-500/10 -bottom-36 -left-36 blur-3xl"></div>
+    </div>
+
+    <div class="admin-login-card w-full max-w-md relative z-10">
+      <!-- Brand -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-600 mb-4 shadow-lg shadow-primary-500/25">
+          <i class="fas fa-code text-2xl text-white"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-white">Skai<span class="gradient-text">Techgh</span></h1>
+        <p class="text-slate-400 text-sm mt-1">Admin Dashboard</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="glass-card p-8">
+        <h2 class="text-xl font-semibold text-white mb-1">Welcome back</h2>
+        <p class="text-slate-400 text-sm mb-6">Sign in to manage your portfolio</p>
+
+        <form id="login-form" autocomplete="on">
+          <!-- Email -->
+          <div class="mb-4">
+            <label for="login-email" class="form-label">Email address</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-envelope text-sm"></i></span>
+              <input type="email" id="login-email" class="form-input pl-10" placeholder="admin@skaitechgh.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-6">
+            <label for="login-password" class="form-label">Password</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-lock text-sm"></i></span>
+              <input type="password" id="login-password" class="form-input pl-10" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors" aria-label="Toggle password visibility">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error message -->
+          <div id="login-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="login-error-text">Invalid credentials</span>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" id="login-btn" class="btn-primary w-full justify-center text-base py-3">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Sign In</span>
+          </button>
+        </form>
+      </div>
+
+      <p class="text-center text-slate-500 text-xs mt-6">&copy; 2024 SkaiTechgh. Protected area.</p>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       ADMIN DASHBOARD (hidden until authenticated)
+       ==================================================== -->
+  <div id="admin-dashboard" class="hidden">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <!-- Brand -->
+      <div class="p-5 border-b border-primary-500/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
+            <i class="fas fa-code text-white text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-white font-bold text-sm leading-tight">SkaiTechgh</h2>
+            <span class="text-xs text-primary-300 font-medium">Admin Panel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="py-4 flex-1">
+        <div class="px-4 mb-2">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Main</span>
+        </div>
+        <a class="nav-item active" data-section="dashboard">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-section="team">
+          <i class="fas fa-users"></i>
+          <span>Team Members</span>
+        </a>
+        <a class="nav-item" data-section="projects">
+          <i class="fas fa-folder-open"></i>
+          <span>Projects</span>
+        </a>
+        <a class="nav-item" data-section="services">
+          <i class="fas fa-cogs"></i>
+          <span>Services</span>
+        </a>
+
+        <div class="px-4 mt-6 mb-2">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Communication</span>
+        </div>
+        <a class="nav-item" data-section="inquiries">
+          <i class="fas fa-envelope-open-text"></i>
+          <span>Inquiries</span>
+          <span id="sidebar-inquiry-badge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+        </a>
+
+        <div class="px-4 mt-6 mb-2">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Configuration</span>
+        </div>
+        <a class="nav-item" data-section="settings">
+          <i class="fas fa-sliders-h"></i>
+          <span>Site Settings</span>
+        </a>
+      </nav>
+
+      <!-- User / Sign Out -->
+      <div class="p-4 border-t border-primary-500/10">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold" id="sidebar-avatar">A</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-slate-300 truncate" id="sidebar-email">admin@example.com</p>
+            <p class="text-xs text-slate-500">Administrator</p>
+          </div>
+        </div>
+        <button id="sign-out-btn" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div class="admin-main">
+
+      <!-- ========== TOP BAR ========== -->
+      <header class="admin-topbar">
+        <div class="flex items-center gap-4">
+          <!-- Mobile menu toggle -->
+          <button id="mobile-menu-toggle" class="lg:hidden text-slate-400 hover:text-white text-xl transition-colors" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+          <!-- Section title -->
+          <h1 class="text-lg font-semibold text-white" id="topbar-title">Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- Notification bell -->
+          <button class="relative text-slate-400 hover:text-white transition-colors p-2" id="topbar-notification-btn" aria-label="Notifications">
+            <i class="fas fa-bell text-lg"></i>
+            <span id="topbar-inquiry-badge" class="inquiry-count-badge hidden">0</span>
+          </button>
+          <!-- User info -->
+          <div class="hidden sm:flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold" id="topbar-avatar">A</div>
+            <span class="text-sm text-slate-300" id="topbar-email">admin@example.com</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ========== CONTENT SECTIONS ========== -->
+      <main class="p-4 sm:p-6 lg:p-8">
+
+        <!-- ===================== DASHBOARD ===================== -->
+        <div id="section-dashboard" class="section-content active">
+          <!-- Stat Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Team Members -->
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
+                  <i class="fas fa-users text-blue-400 text-lg"></i>
+                </div>
+                <span class="text-xs text-blue-400 font-medium bg-blue-500/10 px-2 py-1 rounded-full">Team</span>
+              </div>
+              <p class="text-2xl font-bold text-white" id="stat-team">—</p>
+              <p class="text-sm text-slate-400 mt-1">Total Members</p>
+            </div>
+            <!-- Projects -->
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center">
+                  <i class="fas fa-folder-open text-purple-400 text-lg"></i>
+                </div>
+                <span class="text-xs text-purple-400 font-medium bg-purple-500/10 px-2 py-1 rounded-full">Projects</span>
+              </div>
+              <p class="text-2xl font-bold text-white" id="stat-projects">—</p>
+              <p class="text-sm text-slate-400 mt-1">Total Projects</p>
+            </div>
+            <!-- Services -->
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center">
+                  <i class="fas fa-cogs text-cyan-400 text-lg"></i>
+                </div>
+                <span class="text-xs text-cyan-400 font-medium bg-cyan-500/10 px-2 py-1 rounded-full">Services</span>
+              </div>
+              <p class="text-2xl font-bold text-white" id="stat-services">—</p>
+              <p class="text-sm text-slate-400 mt-1">Active Services</p>
+            </div>
+            <!-- New Inquiries -->
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/20 flex items-center justify-center">
+                  <i class="fas fa-envelope text-amber-400 text-lg"></i>
+                </div>
+                <span class="text-xs text-amber-400 font-medium bg-amber-500/10 px-2 py-1 rounded-full">New</span>
+              </div>
+              <p class="text-2xl font-bold text-white" id="stat-inquiries">—</p>
+              <p class="text-sm text-slate-400 mt-1">New Inquiries</p>
+            </div>
+          </div>
+
+          <!-- Recent Inquiries -->
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Recent Inquiries</h3>
+              <a class="text-sm text-primary-400 hover:text-primary-300 cursor-pointer" onclick="navigateTo('inquiries')">View All →</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-inquiries-body">
+                  <tr>
+                    <td colspan="5">
+                      <div class="loading-spinner-container">
+                        <div class="spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+            <div class="flex flex-wrap gap-3">
+              <button class="btn-primary text-sm" onclick="navigateTo('team'); setTimeout(() => openTeamModal(), 300);">
+                <i class="fas fa-user-plus"></i> Add Team Member
+              </button>
+              <button class="btn-primary text-sm" onclick="navigateTo('projects'); setTimeout(() => openProjectModal(), 300);">
+                <i class="fas fa-plus-circle"></i> Add Project
+              </button>
+              <button class="btn-secondary text-sm" onclick="navigateTo('services'); setTimeout(() => openServiceModal(), 300);">
+                <i class="fas fa-wrench"></i> Add Service
+              </button>
+              <button class="btn-secondary text-sm" onclick="navigateTo('settings');">
+                <i class="fas fa-cog"></i> Site Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== TEAM MEMBERS ===================== -->
+        <div id="section-team" class="section-content">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Team Members</h2>
+              <p class="text-sm text-slate-400 mt-1">Manage your team and their profiles</p>
+            </div>
+            <button class="btn-primary text-sm" onclick="openTeamModal()">
+              <i class="fas fa-user-plus"></i> Add Member
+            </button>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Visible</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="team-table-body">
+                  <tr>
+                    <td colspan="6">
+                      <div class="loading-spinner-container">
+                        <div class="spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== PROJECTS ===================== -->
+        <div id="section-projects" class="section-content">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Projects</h2>
+              <p class="text-sm text-slate-400 mt-1">Showcase your work and case studies</p>
+            </div>
+            <button class="btn-primary text-sm" onclick="openProjectModal()">
+              <i class="fas fa-plus-circle"></i> Add Project
+            </button>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Flagship</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="projects-table-body">
+                  <tr>
+                    <td colspan="7">
+                      <div class="loading-spinner-container">
+                        <div class="spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== SERVICES ===================== -->
+        <div id="section-services" class="section-content">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Services</h2>
+              <p class="text-sm text-slate-400 mt-1">Manage the services you offer to clients</p>
+            </div>
+            <button class="btn-primary text-sm" onclick="openServiceModal()">
+              <i class="fas fa-plus-circle"></i> Add Service
+            </button>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Icon</th>
+                    <th>Title</th>
+                    <th>Visible</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="services-table-body">
+                  <tr>
+                    <td colspan="5">
+                      <div class="loading-spinner-container">
+                        <div class="spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== INQUIRIES ===================== -->
+        <div id="section-inquiries" class="section-content">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Client Inquiries</h2>
+              <p class="text-sm text-slate-400 mt-1">Review and respond to client messages</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <select id="inquiry-status-filter" class="form-input py-2 px-3 text-sm w-auto" onchange="loadInquiries(this.value)">
+                <option value="all">All Inquiries</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Service</th>
+                    <th>Budget</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inquiries-table-body">
+                  <tr>
+                    <td colspan="7">
+                      <div class="loading-spinner-container">
+                        <div class="spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== SITE SETTINGS ===================== -->
+        <div id="section-settings" class="section-content">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold text-white">Site Settings</h2>
+            <p class="text-sm text-slate-400 mt-1">Configure your website content and information</p>
+          </div>
+
+          <!-- Settings Tabs -->
+          <div class="flex flex-wrap gap-2 mb-6">
+            <button class="settings-tab active" data-settings-tab="hero" onclick="switchSettingsTab('hero')">
+              <i class="fas fa-home mr-1.5"></i> Hero Section
+            </button>
+            <button class="settings-tab" data-settings-tab="contact" onclick="switchSettingsTab('contact')">
+              <i class="fas fa-address-card mr-1.5"></i> Contact Info
+            </button>
+            <button class="settings-tab" data-settings-tab="social" onclick="switchSettingsTab('social')">
+              <i class="fas fa-share-alt mr-1.5"></i> Social Links
+            </button>
+            <button class="settings-tab" data-settings-tab="about" onclick="switchSettingsTab('about')">
+              <i class="fas fa-info-circle mr-1.5"></i> About
+            </button>
+          </div>
+
+          <!-- Hero Settings -->
+          <div class="settings-panel active glass-card p-6" id="settings-hero">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-home text-primary-400 mr-2"></i>Hero Section</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="form-label">Headline</label>
+                <input type="text" id="setting-hero-headline" class="form-input" placeholder="We Build Digital Products">
+              </div>
+              <div>
+                <label class="form-label">Subheadline</label>
+                <input type="text" id="setting-hero-subheadline" class="form-input" placeholder="From concept to deployment...">
+              </div>
+              <div>
+                <label class="form-label">CTA Primary Text</label>
+                <input type="text" id="setting-hero-cta_primary" class="form-input" placeholder="View Our Work">
+              </div>
+              <div>
+                <label class="form-label">CTA Secondary Text</label>
+                <input type="text" id="setting-hero-cta_secondary" class="form-input" placeholder="Start a Project">
+              </div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('hero')">
+              <i class="fas fa-save"></i> Save Hero Settings
+            </button>
+          </div>
+
+          <!-- Contact Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-contact">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-address-card text-primary-400 mr-2"></i>Contact Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="form-label">Email</label>
+                <input type="email" id="setting-contact-email" class="form-input" placeholder="hello@skaitechgh.com">
+              </div>
+              <div>
+                <label class="form-label">Phone</label>
+                <input type="text" id="setting-contact-phone" class="form-input" placeholder="+233 XX XXX XXXX">
+              </div>
+              <div>
+                <label class="form-label">Address</label>
+                <input type="text" id="setting-contact-address" class="form-input" placeholder="Accra, Ghana">
+              </div>
+              <div>
+                <label class="form-label">Working Hours</label>
+                <input type="text" id="setting-contact-working_hours" class="form-input" placeholder="Mon - Fri: 9AM - 6PM">
+              </div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('contact')">
+              <i class="fas fa-save"></i> Save Contact Info
+            </button>
+          </div>
+
+          <!-- Social Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-social">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-share-alt text-primary-400 mr-2"></i>Social Links</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="form-label"><i class="fab fa-github mr-1"></i>GitHub URL</label>
+                <input type="url" id="setting-social-github" class="form-input" placeholder="https://github.com/skaitechgh">
+              </div>
+              <div>
+                <label class="form-label"><i class="fab fa-linkedin mr-1"></i>LinkedIn URL</label>
+                <input type="url" id="setting-social-linkedin" class="form-input" placeholder="https://linkedin.com/company/skaitechgh">
+              </div>
+              <div>
+                <label class="form-label"><i class="fab fa-twitter mr-1"></i>Twitter URL</label>
+                <input type="url" id="setting-social-twitter" class="form-input" placeholder="https://twitter.com/skaitechgh">
+              </div>
+              <div>
+                <label class="form-label"><i class="fab fa-instagram mr-1"></i>Instagram URL</label>
+                <input type="url" id="setting-social-instagram" class="form-input" placeholder="https://instagram.com/skaitechgh">
+              </div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('social')">
+              <i class="fas fa-save"></i> Save Social Links
+            </button>
+          </div>
+
+          <!-- About Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-about">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-info-circle text-primary-400 mr-2"></i>About Section</h3>
+            <div class="grid grid-cols-1 gap-4 mb-4">
+              <div>
+                <label class="form-label">Title</label>
+                <input type="text" id="setting-about-title" class="form-input" placeholder="About SkaiTechgh">
+              </div>
+              <div>
+                <label class="form-label">Description</label>
+                <textarea id="setting-about-description" class="form-input" rows="5" placeholder="Tell your story..."></textarea>
+              </div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('about')">
+              <i class="fas fa-save"></i> Save About Settings
+            </button>
+          </div>
+        </div>
+
+      </main>
+    </div><!-- /.admin-main -->
+  </div><!-- /#admin-dashboard -->
+
+  <!-- ====================================================
+       MODAL OVERLAY (shared for all modals)
+       ==================================================== -->
+  <div class="admin-modal-overlay" id="admin-modal-overlay">
+    <div class="admin-modal" id="admin-modal">
+      <!-- Dynamic modal content injected by JS -->
+    </div>
+  </div>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
+
+  <!-- Scripts -->
+  <script src="../js/config.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkaiTechgh — Premier Software Engineering & Digital Solutions</title>
+  <meta name="description" content="SkaiTechgh is a premier software engineering team crafting cutting-edge websites, mobile apps, and enterprise platforms for businesses across Africa and beyond.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { 50:'#EEF2FF',100:'#E0E7FF',200:'#C7D2FE',300:'#A5B4FC',400:'#818CF8',500:'#6366F1',600:'#4F46E5',700:'#4338CA',800:'#3730A3',900:'#312E81' },
+            accent: { 400:'#22D3EE',500:'#06B6D4' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-slate-900 text-gray-100 font-sans">
+
+  <!-- ============================================ -->
+  <!-- PAGE LOADER                                  -->
+  <!-- ============================================ -->
+  <div id="page-loader" class="page-loader">
+    <div class="flex flex-col items-center gap-4">
+      <div class="relative">
+        <div class="spinner"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-primary-400 font-bold text-lg">S</span>
+        </div>
+      </div>
+      <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Loading SkaiTechgh</p>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- NAVIGATION BAR                               -->
+  <!-- ============================================ -->
+  <nav id="navbar" class="navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 lg:h-20">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-primary-600/25 group-hover:shadow-primary-600/40 transition-shadow">S</div>
+          <span class="text-xl font-bold"><span class="gradient-text">Skai</span><span class="text-white">Techgh</span></span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex items-center gap-1">
+          <a href="#hero" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Home</a>
+          <a href="#products" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Products</a>
+          <a href="#services" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Services</a>
+          <a href="#portfolio" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Portfolio</a>
+          <a href="#team" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Team</a>
+          <a href="#contact" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Contact</a>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-3">
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode"></button>
+          <a href="#contact" class="hidden lg:inline-flex btn-primary text-sm py-2 px-5">
+            <i class="fas fa-rocket text-xs"></i> Start a Project
+          </a>
+          <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-colors" aria-label="Open menu">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden hidden border-t border-white/5">
+      <div class="px-4 py-4 space-y-1 bg-slate-900/95 backdrop-blur-xl">
+        <a href="#hero" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Home</a>
+        <a href="#products" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Products</a>
+        <a href="#services" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Services</a>
+        <a href="#portfolio" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Portfolio</a>
+        <a href="#team" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Team</a>
+        <a href="#contact" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Contact</a>
+        <div class="pt-2">
+          <a href="#contact" class="block text-center btn-primary py-3"><i class="fas fa-rocket text-xs mr-1"></i> Start a Project</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================ -->
+  <!-- HERO SECTION                                 -->
+  <!-- ============================================ -->
+  <section id="hero" class="hero-bg min-h-screen flex items-center relative pt-20">
+    <div class="hero-grid"></div>
+    <!-- Floating Tech Icons -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-[10%] text-primary-500/10 text-6xl animate-[float_6s_ease-in-out_infinite]"><i class="fas fa-code"></i></div>
+      <div class="absolute top-1/3 right-[15%] text-accent-400/10 text-5xl animate-[float_8s_ease-in-out_infinite_1s]"><i class="fas fa-mobile-alt"></i></div>
+      <div class="absolute bottom-1/3 left-[20%] text-primary-400/10 text-4xl animate-[float_7s_ease-in-out_infinite_2s]"><i class="fas fa-database"></i></div>
+      <div class="absolute top-1/2 right-[8%] text-accent-500/10 text-5xl animate-[float_9s_ease-in-out_infinite_0.5s]"><i class="fas fa-cloud"></i></div>
+      <div class="absolute bottom-1/4 right-[25%] text-primary-300/10 text-4xl animate-[float_6.5s_ease-in-out_infinite_1.5s]"><i class="fas fa-cogs"></i></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-sm font-medium mb-8 animate-[fadeInDown_0.6s_ease_forwards]">
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+          Trusted by businesses across Africa
+        </div>
+        <h1 id="hero-headline" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6 animate-[fadeInUp_0.8s_ease_forwards]">
+          We Build Digital Experiences <br><span class="gradient-text">That Drive Growth</span>
+        </h1>
+        <p id="hero-subheadline" class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-[fadeInUp_0.8s_ease_0.2s_forwards] opacity-0" style="animation-fill-mode:forwards">
+          SkaiTechgh is a premier software engineering team crafting cutting-edge websites, mobile apps, and enterprise platforms for businesses across Africa and beyond.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-[fadeInUp_0.8s_ease_0.4s_forwards] opacity-0" style="animation-fill-mode:forwards">
+          <a href="#portfolio" class="btn-primary text-base py-3.5 px-8"><i class="fas fa-th-large text-sm"></i> <span id="cta-primary-text">Explore Our Work</span></a>
+          <a href="#contact" class="btn-secondary text-base py-3.5 px-8"><i class="fas fa-paper-plane text-sm"></i> <span id="cta-secondary-text">Start a Project</span></a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto animate-[fadeInUp_0.8s_ease_0.6s_forwards] opacity-0" style="animation-fill-mode:forwards">
+          <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">50+</div><div class="text-slate-400 text-sm font-medium">Projects Delivered</div></div>
+          <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">20+</div><div class="text-slate-400 text-sm font-medium">Happy Clients</div></div>
+          <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">5+</div><div class="text-slate-400 text-sm font-medium">Years Experience</div></div>
+          <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">99%</div><div class="text-slate-400 text-sm font-medium">Client Satisfaction</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <a href="#products" class="text-slate-500 hover:text-primary-400 transition-colors"><i class="fas fa-chevron-down text-xl"></i></a>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- FLAGSHIP PRODUCTS SECTION                    -->
+  <!-- ============================================ -->
+  <section id="products" class="py-24 relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary-600/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-star text-xs"></i> Flagship Products</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Our <span class="gradient-text">Proprietary Platforms</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Innovative products built in-house, powering thousands of users across Ghana and beyond.</p>
+      </div>
+      <div id="flagship-container" class="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <!-- SkaiTechgh Card -->
+        <div class="glass-card p-8 lg:p-10 relative group reveal delay-100">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>
+          <div class="relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center mb-6 shadow-lg shadow-primary-600/25"><i class="fas fa-bolt text-2xl text-white"></i></div>
+            <h3 class="text-2xl lg:text-3xl font-bold mb-3">SkaiTech<span class="gradient-text">gh</span></h3>
+            <p class="text-slate-400 mb-6 leading-relaxed">Automated digital services platform powering mobile data purchases, airtime top-ups, utility bill payments, and a comprehensive agent store ecosystem. Built for speed, reliability, and scale.</p>
+            <div class="space-y-3 mb-8">
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Mobile Data & Airtime Top-ups</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Utility Bill Payments</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Agent Store Ecosystem</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Mobile Money Integration</span></div>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-8">
+              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">React</span>
+              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Node.js</span>
+              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">PostgreSQL</span>
+              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Redis</span>
+              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Mobile Money</span>
+            </div>
+            <a href="#" class="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>
+          </div>
+        </div>
+        <!-- SkaiSchool Card -->
+        <div class="glass-card p-8 lg:p-10 relative group reveal delay-200">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-accent-500/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>
+          <div class="relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-400 flex items-center justify-center mb-6 shadow-lg shadow-accent-500/25"><i class="fas fa-graduation-cap text-2xl text-white"></i></div>
+            <h3 class="text-2xl lg:text-3xl font-bold mb-3">Skai<span class="gradient-text-accent">School</span></h3>
+            <p class="text-slate-400 mb-6 leading-relaxed">Comprehensive school management and educational technology platform designed to digitize academic operations. From enrollment to graduation — everything in one place.</p>
+            <div class="space-y-3 mb-8">
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Student Enrollment & Attendance</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Grade & Exam Management</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Fee Processing & Finance</span></div>
+              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Parent Communication Portal</span></div>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-8">
+              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Next.js</span>
+              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">TypeScript</span>
+              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Supabase</span>
+              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Tailwind</span>
+              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">PWA</span>
+            </div>
+            <a href="#" class="inline-flex items-center gap-2 text-accent-400 hover:text-accent-500 font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SERVICES SECTION                             -->
+  <!-- ============================================ -->
+  <section id="services" class="py-24 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary-900/5 to-transparent pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-cogs text-xs"></i> What We Do</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Services We <span class="gradient-text">Offer</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">End-to-end digital solutions tailored to transform your business and accelerate growth.</p>
+      </div>
+      <div id="services-container" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Service cards rendered by app.js with fallback content -->
+        <div class="glass-card p-6 text-center reveal delay-100">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600/20 to-primary-600/5 flex items-center justify-center mx-auto mb-5"><i class="fas fa-globe text-2xl text-primary-400"></i></div>
+          <h3 class="text-lg font-bold mb-3">Corporate & E-Commerce Websites</h3>
+          <p class="text-slate-400 text-sm mb-5 leading-relaxed">High-performance, responsive websites designed to convert visitors into customers.</p>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-green-400 text-[10px]"></i>Responsive Design</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-green-400 text-[10px]"></i>SEO Optimization</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-green-400 text-[10px]"></i>E-Commerce Integration</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-green-400 text-[10px]"></i>CMS Development</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-green-400 text-[10px]"></i>Performance Optimization</div>
+          </div>
+        </div>
+        <div class="glass-card p-6 text-center reveal delay-200">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-500/20 to-accent-500/5 flex items-center justify-center mx-auto mb-5"><i class="fas fa-mobile-alt text-2xl text-accent-400"></i></div>
+          <h3 class="text-lg font-bold mb-3">Mobile Applications</h3>
+          <p class="text-slate-400 text-sm mb-5 leading-relaxed">Cross-platform mobile apps for iOS and Android with seamless user experiences.</p>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-cyan-400 text-[10px]"></i>iOS & Android</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-cyan-400 text-[10px]"></i>React Native / Flutter</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-cyan-400 text-[10px]"></i>Offline Support</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-cyan-400 text-[10px]"></i>Push Notifications</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-cyan-400 text-[10px]"></i>App Store Deployment</div>
+          </div>
+        </div>
+        <div class="glass-card p-6 text-center reveal delay-300">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600/20 to-purple-600/5 flex items-center justify-center mx-auto mb-5"><i class="fas fa-server text-2xl text-purple-400"></i></div>
+          <h3 class="text-lg font-bold mb-3">Web Applications & APIs</h3>
+          <p class="text-slate-400 text-sm mb-5 leading-relaxed">Custom web apps, RESTful APIs, and cloud-based systems for your business logic.</p>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-purple-400 text-[10px]"></i>Custom Web Apps</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-purple-400 text-[10px]"></i>RESTful & GraphQL APIs</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-purple-400 text-[10px]"></i>Cloud Architecture</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-purple-400 text-[10px]"></i>Database Design</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-purple-400 text-[10px]"></i>Third-Party Integrations</div>
+          </div>
+        </div>
+        <div class="glass-card p-6 text-center reveal delay-400">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-600/20 to-pink-600/5 flex items-center justify-center mx-auto mb-5"><i class="fas fa-paint-brush text-2xl text-pink-400"></i></div>
+          <h3 class="text-lg font-bold mb-3">UI/UX Design & Digital Transformation</h3>
+          <p class="text-slate-400 text-sm mb-5 leading-relaxed">User-centered design and digital strategy that transforms business engagement.</p>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>User Research</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>Wireframing & Prototyping</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>Visual Design</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>Design Systems</div>
+            <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>Digital Strategy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- PORTFOLIO / CASE STUDIES SECTION             -->
+  <!-- ============================================ -->
+  <section id="portfolio" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-briefcase text-xs"></i> Our Work</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Featured <span class="gradient-text">Projects</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">A selection of projects that showcase our expertise and commitment to excellence.</p>
+      </div>
+      <!-- Filter Tabs -->
+      <div class="filter-tabs reveal">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="website">Websites</button>
+        <button class="filter-tab" data-filter="mobile_app">Mobile Apps</button>
+        <button class="filter-tab" data-filter="web_app">Web Apps</button>
+        <button class="filter-tab" data-filter="flagship">Flagship Platforms</button>
+      </div>
+      <!-- Projects Grid -->
+      <div id="portfolio-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="col-span-full text-center py-12">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-slate-500 text-sm">Loading projects...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- TEAM SECTION                                 -->
+  <!-- ============================================ -->
+  <section id="team" class="py-24 relative overflow-hidden">
+    <div class="absolute top-1/2 left-0 w-96 h-96 bg-primary-600/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-users text-xs"></i> Our People</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Meet the <span class="gradient-text">Team</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">The talented engineers, designers, and strategists behind SkaiTechgh.</p>
+      </div>
+      <div id="team-container" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="col-span-full text-center py-12">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-slate-500 text-sm">Loading team...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- TESTIMONIALS SECTION                         -->
+  <!-- ============================================ -->
+  <section id="testimonials" class="py-24 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary-900/5 to-transparent pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-quote-left text-xs"></i> Testimonials</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">What Our <span class="gradient-text">Clients Say</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Hear from businesses we've helped transform with our digital solutions.</p>
+      </div>
+      <div id="testimonials-container" class="flex gap-6 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory scroll-smooth">
+        <!-- Testimonials loaded by app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- CONTACT SECTION                              -->
+  <!-- ============================================ -->
+  <section id="contact" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-envelope text-xs"></i> Get in Touch</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Start Your <span class="gradient-text">Project</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Ready to bring your vision to life? Let's discuss your project and find the perfect solution.</p>
+      </div>
+      <div class="grid lg:grid-cols-5 gap-12">
+        <!-- Contact Info (Left) -->
+        <div class="lg:col-span-2 space-y-8 reveal-left">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-600/10 border border-primary-500/20 flex items-center justify-center shrink-0"><i class="fas fa-envelope text-primary-400"></i></div>
+            <div><h4 class="font-semibold mb-1">Email Us</h4><p id="contact-email" class="text-slate-400 text-sm">hello@skaitechgh.com</p></div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-600/10 border border-primary-500/20 flex items-center justify-center shrink-0"><i class="fas fa-phone text-primary-400"></i></div>
+            <div><h4 class="font-semibold mb-1">Call Us</h4><p id="contact-phone" class="text-slate-400 text-sm">+233 XX XXX XXXX</p></div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-600/10 border border-primary-500/20 flex items-center justify-center shrink-0"><i class="fas fa-map-marker-alt text-primary-400"></i></div>
+            <div><h4 class="font-semibold mb-1">Visit Us</h4><p id="contact-address" class="text-slate-400 text-sm">Accra, Ghana</p></div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-600/10 border border-primary-500/20 flex items-center justify-center shrink-0"><i class="fas fa-clock text-primary-400"></i></div>
+            <div><h4 class="font-semibold mb-1">Working Hours</h4><p id="contact-hours" class="text-slate-400 text-sm">Mon - Fri: 9:00 AM - 6:00 PM</p></div>
+          </div>
+          <div class="pt-4">
+            <h4 class="font-semibold mb-4">Follow Us</h4>
+            <div class="flex gap-3" id="social-links">
+              <a href="#" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+          </div>
+        </div>
+        <!-- Contact Form (Right) -->
+        <div class="lg:col-span-3 reveal-right">
+          <form id="contact-form" class="glass-card p-8 lg:p-10 space-y-6">
+            <div class="grid sm:grid-cols-2 gap-6">
+              <div><label for="inquiry-name" class="form-label">Full Name *</label><input type="text" id="inquiry-name" class="form-input" placeholder="John Doe" required></div>
+              <div><label for="inquiry-email" class="form-label">Email Address *</label><input type="email" id="inquiry-email" class="form-input" placeholder="john@company.com" required></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-6">
+              <div><label for="inquiry-phone" class="form-label">Phone Number</label><input type="tel" id="inquiry-phone" class="form-input" placeholder="+233 XX XXX XXXX"></div>
+              <div><label for="inquiry-company" class="form-label">Company</label><input type="text" id="inquiry-company" class="form-input" placeholder="Your Company"></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-6">
+              <div>
+                <label for="inquiry-service" class="form-label">Service Needed</label>
+                <select id="inquiry-service" class="form-input">
+                  <option value="">Select a service</option>
+                  <option value="Corporate Website">Corporate Website</option>
+                  <option value="E-Commerce Website">E-Commerce Website</option>
+                  <option value="Mobile Application">Mobile Application</option>
+                  <option value="Web Application">Web Application</option>
+                  <option value="UI/UX Design">UI/UX Design</option>
+                  <option value="API Integration">API Integration</option>
+                  <option value="Digital Transformation">Digital Transformation</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label for="inquiry-budget" class="form-label">Budget Range</label>
+                <select id="inquiry-budget" class="form-input">
+                  <option value="">Select budget</option>
+                  <option value="Under $1,000">Under $1,000</option>
+                  <option value="$1,000 - $5,000">$1,000 - $5,000</option>
+                  <option value="$5,000 - $15,000">$5,000 - $15,000</option>
+                  <option value="$15,000 - $50,000">$15,000 - $50,000</option>
+                  <option value="$50,000+">$50,000+</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label for="inquiry-message" class="form-label">Project Details *</label>
+              <textarea id="inquiry-message" class="form-input" rows="5" placeholder="Tell us about your project — goals, timeline, and any specific requirements..." required></textarea>
+            </div>
+            <button type="submit" id="contact-submit" class="btn-primary w-full justify-center py-4 text-base">
+              <i class="fas fa-paper-plane"></i> Send Inquiry
+            </button>
+            <p class="text-slate-500 text-xs text-center">We typically respond within 24 hours.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- FOOTER                                       -->
+  <!-- ============================================ -->
+  <footer class="border-t border-white/5 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-sm">S</div>
+            <span class="text-lg font-bold"><span class="gradient-text">Skai</span><span>Techgh</span></span>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed mb-5">Premier software engineering team crafting cutting-edge digital solutions for businesses across Africa and beyond.</p>
+          <div class="flex gap-3" id="footer-social-links">
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-slate-300">Quick Links</h4>
+          <ul class="space-y-3">
+            <li><a href="#hero" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Home</a></li>
+            <li><a href="#products" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Products</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Services</a></li>
+            <li><a href="#portfolio" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Portfolio</a></li>
+            <li><a href="#team" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Our Team</a></li>
+            <li><a href="#contact" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-slate-300">Services</h4>
+          <ul class="space-y-3">
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Corporate Websites</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Mobile Applications</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Web Applications</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">UI/UX Design</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">API Integrations</a></li>
+            <li><a href="#services" class="text-slate-400 hover:text-primary-400 text-sm transition-colors">Digital Strategy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-slate-300">Contact</h4>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-2 text-slate-400 text-sm"><i class="fas fa-envelope text-xs text-primary-400"></i><span id="footer-email">hello@skaitechgh.com</span></li>
+            <li class="flex items-center gap-2 text-slate-400 text-sm"><i class="fas fa-phone text-xs text-primary-400"></i><span id="footer-phone">+233 XX XXX XXXX</span></li>
+            <li class="flex items-center gap-2 text-slate-400 text-sm"><i class="fas fa-map-marker-alt text-xs text-primary-400"></i><span id="footer-address">Accra, Ghana</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-slate-500 text-sm">&copy; 2024 SkaiTechgh. All rights reserved.</p>
+        <div class="flex items-center gap-6">
+          <a href="#" class="text-slate-500 hover:text-slate-300 text-sm transition-colors">Privacy Policy</a>
+          <a href="#" class="text-slate-500 hover:text-slate-300 text-sm transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <button id="back-to-top" class="fixed bottom-6 right-6 w-12 h-12 rounded-xl bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/25 flex items-center justify-center transition-all opacity-0 pointer-events-none translate-y-4 z-50" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

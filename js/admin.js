@@ -966,6 +966,11 @@ function updateTechStackTags() {
 }
 
 async function saveProject(e) {
+  // Sync Quill editor content to hidden fields
+  if (window._projQuill) {
+    document.getElementById('proj-full-desc').value = window._projQuill.getText();
+    document.getElementById('proj-desc-html').value = window._projQuill.root.innerHTML;
+  }
   e.preventDefault();
   const btn = document.getElementById('proj-save-btn');
   const originalHTML = btn.innerHTML;
@@ -1012,6 +1017,7 @@ async function saveProject(e) {
     const projectData = {
       title: document.getElementById('proj-title').value.trim(),
       short_description: document.getElementById('proj-short-desc').value.trim(),
+      description: document.getElementById('proj-full-desc').value.trim(),
       full_description: document.getElementById('proj-full-desc').value.trim(),
       client_challenge: document.getElementById('proj-challenge').value.trim(),
       category: document.getElementById('proj-category').value,

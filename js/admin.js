@@ -11,7 +11,9 @@ let currentSection = 'dashboard';
 let editingTeamMember = null;
 let editingProject = null;
 let editingService = null;
+let editingMedia = null;
 let viewingInquiry = null;
+let siteSettingsCache = {};
 
 // ============================================
 // INITIALIZATION
@@ -109,6 +111,9 @@ function initEventListeners() {
   if (notifBtn) {
     notifBtn.addEventListener('click', () => navigateTo('inquiries'));
   }
+
+  initFileUploadDragDrop('brand-logo-upload', 'brand-logo-input');
+  initFileUploadDragDrop('brand-favicon-upload', 'brand-favicon-input');
 }
 
 // ============================================
@@ -182,6 +187,7 @@ function showDashboard() {
   loadRecentInquiries();
   loadTeamMembers();
   loadProjects();
+  loadMediaAssets();
   loadServices();
   loadInquiries();
   loadSiteSettings();
@@ -211,7 +217,8 @@ function navigateTo(section) {
   const titles = {
     dashboard: 'Dashboard',
     team: 'Team Members',
-    projects: 'Projects',
+    projects: 'Websites & Apps',
+    media: 'Media Library',
     services: 'Services',
     inquiries: 'Client Inquiries',
     settings: 'Site Settings',
@@ -256,6 +263,7 @@ function closeModal() {
   editingTeamMember = null;
   editingProject = null;
   editingService = null;
+  editingMedia = null;
   viewingInquiry = null;
 }
 
@@ -403,7 +411,7 @@ async function loadRecentInquiries() {
 
     tbody.innerHTML = data.map(inq => `
       <tr>
-        <td class="font-medium text-white">${escapeHtml(inq.name)}</td>
+        <td class="font-medium text-white">${escapeHtml(inq.full_name || inq.name)}</td>
         <td>${escapeHtml(inq.email)}</td>
         <td>${escapeHtml(inq.service_type || '—')}</td>
         <td>${formatDate(inq.created_at)}</td>
@@ -756,6 +764,8 @@ async function loadProjects() {
 }
 
 async function openProjectModal(projectId) {
+  newProjectImages = [];
+  removedProjectImages = [];
   let project = null;
   if (projectId) {
     try {
@@ -803,6 +813,17 @@ async function openProjectModal(projectId) {
             <option value="web_app" ${project?.category === 'web_app' ? 'selected' : ''}>Web App</option>
             <option value="flagship" ${project?.category === 'flagship' ? 'selected' : ''}>Flagship</option>
           </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="form-label">Card Icon <span class="text-slate-500">(Font Awesome class)</span></label>
+          <input type="text" id="proj-icon" class="form-input" value="${escapeHtml(project?.icon || 'fas fa-bolt')}" placeholder="fas fa-bolt">
+        </div>
+        <div>
+          <label class="form-label">Highlights <span class="text-slate-500">(comma-separated)</span></label>
+          <input type="text" id="proj-highlights" class="form-input" value="${escapeHtml(Array.isArray(project?.highlights) ? project.highlights.join(', ') : '')}" placeholder="Fast, Secure, Easy to use">
         </div>
       </div>
 
@@ -1026,6 +1047,8 @@ async function saveProject(e) {
       tech_stack: techStack,
       live_url: document.getElementById('proj-live-url').value.trim(),
       github_url: document.getElementById('proj-github-url').value.trim(),
+      icon: document.getElementById('proj-icon').value.trim() || 'fas fa-code',
+      highlights: document.getElementById('proj-highlights').value.split(',').map(t => t.trim()).filter(Boolean),
       display_order: parseInt(document.getElementById('proj-order').value) || 0,
       status: document.getElementById('proj-status').value,
       is_flagship: document.getElementById('proj-flagship').checked,
@@ -1102,6 +1125,141 @@ async function deleteProject(id) {
   } catch (err) {
     console.error('Delete project error:', err);
     showToast('Failed to delete project.', 'error');
+  }
+}
+
+// ============================================
+// MEDIA LIBRARY
+// ============================================
+
+async function loadMediaAssets() {
+  const tbody = document.getElementById('media-table-body');
+  if (!tbody) return;
+  try {
+    const media = await fetchMediaAssets();
+    if (!media.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-photo-video block"></i><p>No media yet. Upload your first image.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = media.map(asset => `
+      <tr>
+        <td><img src="${escapeHtml(asset.file_url)}" alt="${escapeHtml(asset.alt_text || asset.name)}" class="w-16 h-12 rounded-lg object-cover border border-primary-500/20"></td>
+        <td class="font-medium text-white">${escapeHtml(asset.name)}</td>
+        <td class="text-slate-400">${escapeHtml(asset.alt_text || '—')}</td>
+        <td><div class="toggle-switch ${asset.is_visible ? 'active' : ''}" onclick="toggleMediaVisibility('${asset.id}', ${!asset.is_visible})" title="${asset.is_visible ? 'Visible' : 'Hidden'}"></div></td>
+        <td>${formatDate(asset.created_at)}</td>
+        <td><div class="flex items-center gap-2"><button class="btn-sm btn-view" onclick="copyMediaUrl('${escapeHtml(asset.file_url)}')"><i class="fas fa-link"></i></button><button class="btn-sm btn-delete" onclick="deleteMediaAsset('${asset.id}', '${escapeHtml(asset.file_path)}')"><i class="fas fa-trash"></i></button></div></td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Failed to load media:', err);
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-4">Media table is unavailable. Run migration-v3-content-control.sql in Supabase.</td></tr>';
+  }
+}
+
+function openMediaModal() {
+  editingMedia = null;
+  const html = `
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-white">Upload Media</h2>
+      <button class="text-slate-400 hover:text-white transition-colors text-xl" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="media-form" onsubmit="saveMediaAsset(event)">
+      <div class="mb-5">
+        <label class="form-label">Image File *</label>
+        <div class="file-upload-area" id="media-upload" onclick="document.getElementById('media-input').click()">
+          <div id="media-preview"><i class="fas fa-cloud-upload-alt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop to upload</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, GIF, SVG up to 10MB</p></div>
+        </div>
+        <input type="file" id="media-input" accept="image/*,.svg" class="hidden" onchange="previewMediaImage(this)">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div><label class="form-label">Name *</label><input type="text" id="media-name" class="form-input" required placeholder="Homepage hero image"></div>
+        <div><label class="form-label">Alt Text</label><input type="text" id="media-alt" class="form-input" placeholder="Describe the image"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div><label class="form-label">Display Order</label><input type="number" id="media-order" class="form-input" min="0" value="0"></div>
+        <div class="flex items-center gap-3 pt-6"><input type="checkbox" id="media-visible" class="w-5 h-5 rounded accent-primary-500 cursor-pointer" checked><label for="media-visible" class="form-label mb-0 cursor-pointer">Publicly visible</label></div>
+      </div>
+      <div class="flex justify-end gap-3"><button type="button" class="btn-secondary text-sm py-2" onclick="closeModal()">Cancel</button><button type="submit" id="media-save-btn" class="btn-primary text-sm py-2"><i class="fas fa-upload"></i> Upload Image</button></div>
+    </form>
+  `;
+  openModal(html);
+  initFileUploadDragDrop('media-upload', 'media-input');
+}
+
+function previewMediaImage(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = event => {
+    document.getElementById('media-preview').innerHTML = `<img src="${event.target.result}" alt="Preview" class="mx-auto max-h-32 rounded-lg"><p class="text-xs text-slate-400 mt-2">Click to change</p>`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function saveMediaAsset(e) {
+  e.preventDefault();
+  const btn = document.getElementById('media-save-btn');
+  const originalHTML = btn.innerHTML;
+  setButtonLoading(btn, true);
+  try {
+    const input = document.getElementById('media-input');
+    if (!input.files || !input.files[0]) throw new Error('Please choose an image first.');
+    const file = input.files[0];
+    const ext = getFileExtension(file.name);
+    const path = `library/${generateUUID()}.${ext}`;
+    const fileUrl = await uploadFile('site-media', path, file);
+    const { error } = await _supabase.from('media_assets').insert([{
+      name: document.getElementById('media-name').value.trim(),
+      file_path: path,
+      file_url: fileUrl,
+      alt_text: document.getElementById('media-alt').value.trim(),
+      media_type: 'image',
+      display_order: parseInt(document.getElementById('media-order').value) || 0,
+      is_visible: document.getElementById('media-visible').checked
+    }]);
+    if (error) throw error;
+    showToast('Image uploaded successfully!', 'success');
+    closeModal();
+    loadMediaAssets();
+  } catch (err) {
+    console.error('Save media error:', err);
+    showToast('Failed to upload image: ' + (err.message || 'Unknown error'), 'error');
+    setButtonLoading(btn, false, originalHTML);
+  }
+}
+
+async function toggleMediaVisibility(id, newValue) {
+  try {
+    const { error } = await _supabase.from('media_assets').update({ is_visible: newValue }).eq('id', id);
+    if (error) throw error;
+    loadMediaAssets();
+  } catch (err) {
+    showToast('Failed to update media visibility.', 'error');
+  }
+}
+
+async function deleteMediaAsset(id, filePath) {
+  if (!confirm('Delete this media file? This cannot be undone.')) return;
+  try {
+    const { error } = await _supabase.from('media_assets').delete().eq('id', id);
+    if (error) throw error;
+    if (filePath) {
+      try { await deleteFile('site-media', filePath); } catch (storageError) { console.warn('Storage cleanup failed:', storageError); }
+    }
+    showToast('Media deleted.', 'success');
+    loadMediaAssets();
+  } catch (err) {
+    console.error('Delete media error:', err);
+    showToast('Failed to delete media.', 'error');
+  }
+}
+
+async function copyMediaUrl(url) {
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('Media URL copied.', 'success');
+  } catch (err) {
+    window.prompt('Copy this media URL:', url);
   }
 }
 
@@ -1380,7 +1538,7 @@ async function loadInquiries(statusFilter) {
           <a href="mailto:${escapeHtml(inq.email)}" class="text-primary-400 hover:text-primary-300">${escapeHtml(inq.email)}</a>
         </td>
         <td>${escapeHtml(inq.service_type || '—')}</td>
-        <td>${escapeHtml(inq.budget || '—')}</td>
+        <td>${escapeHtml(inq.budget_range || inq.budget || '—')}</td>
         <td>${statusBadge(inq.status || 'new')}</td>
         <td>${formatDate(inq.created_at)}</td>
         <td>
@@ -1423,7 +1581,7 @@ async function openInquiryModal(inquiryId) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <div>
         <label class="form-label text-slate-500">Full Name</label>
-        <p class="text-white font-medium">${escapeHtml(inquiry.name || '—')}</p>
+        <p class="text-white font-medium">${escapeHtml(inquiry.full_name || inquiry.name || '—')}</p>
       </div>
       <div>
         <label class="form-label text-slate-500">Email</label>
@@ -1443,7 +1601,7 @@ async function openInquiryModal(inquiryId) {
       </div>
       <div>
         <label class="form-label text-slate-500">Budget</label>
-        <p class="text-slate-300">${escapeHtml(inquiry.budget || '—')}</p>
+        <p class="text-slate-300">${escapeHtml(inquiry.budget_range || inquiry.budget || '—')}</p>
       </div>
     </div>
 
@@ -1525,6 +1683,17 @@ async function updateInquiryStatus(e) {
 async function loadSiteSettings() {
   try {
     const settings = await fetchAllSiteSettings();
+    siteSettingsCache = settings;
+
+    // Brand settings
+    if (settings.brand) {
+      const brand = settings.brand;
+      setInputValue('setting-brand-name', brand.brand_name);
+      setInputValue('setting-brand-tagline', brand.tagline);
+      setInputValue('setting-brand-logo_alt', brand.logo_alt);
+      renderBrandPreview('brand-logo-preview', brand.logo_url, 'Current logo');
+      renderBrandPreview('brand-favicon-preview', brand.favicon_url, 'Current favicon');
+    }
 
     // Hero settings
     if (settings.hero) {
@@ -1559,10 +1728,38 @@ async function loadSiteSettings() {
       setInputValue('setting-about-title', about.title);
       setInputValue('setting-about-description', about.description);
     }
+
+    if (settings.stats?.items) {
+      settings.stats.items.slice(0, 4).forEach((item, index) => {
+        setInputValue(`setting-stats-${index + 1}-value`, item.value);
+        setInputValue(`setting-stats-${index + 1}-label`, item.label);
+      });
+    }
+
+    if (settings.footer) {
+      setInputValue('setting-footer-description', settings.footer.description);
+      setInputValue('setting-footer-copyright', settings.footer.copyright);
+    }
   } catch (err) {
     console.error('Failed to load site settings:', err);
     showToast('Failed to load site settings.', 'error');
   }
+}
+
+function renderBrandPreview(id, url, label) {
+  const container = document.getElementById(id);
+  if (!container || !url) return;
+  container.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(label)}" class="mx-auto max-h-24 rounded-lg object-contain"><p class="text-xs text-slate-400 mt-2">${escapeHtml(label)} — click to change</p>`;
+}
+
+function previewBrandImage(input, previewId) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = event => {
+    const container = document.getElementById(previewId);
+    if (container) container.innerHTML = `<img src="${event.target.result}" alt="Preview" class="mx-auto max-h-24 rounded-lg object-contain"><p class="text-xs text-slate-400 mt-2">New image selected</p>`;
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
 function setInputValue(id, value) {
@@ -1630,6 +1827,49 @@ async function saveSettingsGroup(group) {
           description: document.getElementById('setting-about-description').value.trim()
         };
         break;
+      case 'brand': {
+        const previous = siteSettingsCache.brand || {};
+        let logoUrl = previous.logo_url || '';
+        let logoPath = previous.logo_path || '';
+        let faviconUrl = previous.favicon_url || '';
+        let faviconPath = previous.favicon_path || '';
+        const logoInput = document.getElementById('brand-logo-input');
+        const faviconInput = document.getElementById('brand-favicon-input');
+
+        if (logoInput.files && logoInput.files[0]) {
+          const file = logoInput.files[0];
+          logoPath = `brand/logo_${generateUUID()}.${getFileExtension(file.name)}`;
+          logoUrl = await uploadFile('site-media', logoPath, file);
+        }
+        if (faviconInput.files && faviconInput.files[0]) {
+          const file = faviconInput.files[0];
+          faviconPath = `brand/favicon_${generateUUID()}.${getFileExtension(file.name)}`;
+          faviconUrl = await uploadFile('site-media', faviconPath, file);
+        }
+
+        value = {
+          brand_name: document.getElementById('setting-brand-name').value.trim(),
+          tagline: document.getElementById('setting-brand-tagline').value.trim(),
+          logo_alt: document.getElementById('setting-brand-logo_alt').value.trim(),
+          logo_url: logoUrl,
+          logo_path: logoPath,
+          favicon_url: faviconUrl,
+          favicon_path: faviconPath
+        };
+        break;
+      }
+      case 'stats':
+        value = { items: [1, 2, 3, 4].map(index => ({
+          value: document.getElementById(`setting-stats-${index}-value`).value.trim(),
+          label: document.getElementById(`setting-stats-${index}-label`).value.trim()
+        })).filter(item => item.value || item.label) };
+        break;
+      case 'footer':
+        value = {
+          description: document.getElementById('setting-footer-description').value.trim(),
+          copyright: document.getElementById('setting-footer-copyright').value.trim()
+        };
+        break;
       default:
         throw new Error('Unknown settings group: ' + group);
     }
@@ -1640,6 +1880,8 @@ async function saveSettingsGroup(group) {
       .upsert({ key: group, value: value }, { onConflict: 'key' });
 
     if (error) throw error;
+
+    siteSettingsCache[group] = value;
 
     showToast(`${group.charAt(0).toUpperCase() + group.slice(1)} settings saved successfully!`, 'success');
   } catch (err) {

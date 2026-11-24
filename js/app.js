@@ -241,6 +241,10 @@ async function loadAllContent() {
     loadContactInfo(),
     loadSocialLinks(),
     loadStats(),
+    loadBrandContent(),
+    loadFooterContent(),
+    loadFlagshipContent(),
+    loadServicesContent(),
     loadProjects(),
     loadTeamMembers(),
     loadTestimonials()
@@ -299,6 +303,58 @@ async function loadSocialLinks() {
   }
 }
 
+// ---- Brand and footer content ----
+async function loadBrandContent() {
+  try {
+    const brand = await fetchSiteSetting('brand');
+    if (!brand) return;
+
+    const brandName = brand.brand_name || 'SkaiTechgh';
+    const brandNameEl = document.getElementById('site-brand-name');
+    const footerBrandNameEl = document.getElementById('footer-brand-name');
+    if (brandNameEl) brandNameEl.textContent = brandName;
+    if (footerBrandNameEl) footerBrandNameEl.textContent = brandName;
+
+    applyLogoToSite(brand.logo_url, 'site-logo-image', 'site-logo-mark');
+    applyLogoToSite(brand.logo_url, 'footer-logo-image', 'footer-logo-mark');
+
+    if (brand.favicon_url) {
+      const favicon = document.getElementById('site-favicon');
+      if (favicon) {
+        favicon.href = brand.favicon_url;
+        favicon.type = 'image/png';
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load brand content:', err);
+  }
+}
+
+function applyLogoToSite(url, imageId, fallbackId) {
+  const image = document.getElementById(imageId);
+  const fallback = document.getElementById(fallbackId);
+  if (!image || !fallback) return;
+  if (url) {
+    image.src = url;
+    image.classList.remove('hidden');
+    fallback.classList.add('hidden');
+  } else {
+    image.classList.add('hidden');
+    fallback.classList.remove('hidden');
+  }
+}
+
+async function loadFooterContent() {
+  try {
+    const footer = await fetchSiteSetting('footer');
+    if (!footer) return;
+    setTextContent('footer-description', footer.description);
+    setTextContent('footer-copyright', footer.copyright);
+  } catch (err) {
+    console.warn('Could not load footer content:', err);
+  }
+}
+
 function updateSocialLinks(containerId, social) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -314,6 +370,110 @@ function updateSocialLinks(containerId, social) {
       }
     }
   });
+}
+
+// ---- Flagship products / in-house apps ----
+async function loadFlagshipContent() {
+  try {
+    const products = await fetchFlagshipProjects();
+    renderFlagshipProjects(products);
+  } catch (err) {
+    console.warn('Could not load flagship products:', err);
+  }
+}
+
+function renderFlagshipProjects(projects) {
+  const container = document.getElementById('flagship-container');
+  if (!container) return;
+  if (!projects || projects.length === 0) {
+    container.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-slate-500">Our products are being updated. Check back soon.</p></div>';
+    return;
+  }
+
+  const accents = [
+    { card: 'from-primary-600 to-primary-800', shadow: 'shadow-primary-600/25', text: 'text-primary-400' },
+    { card: 'from-accent-500 to-accent-400', shadow: 'shadow-accent-500/25', text: 'text-accent-400' },
+    { card: 'from-purple-600 to-purple-800', shadow: 'shadow-purple-600/25', text: 'text-purple-400' }
+  ];
+
+  container.innerHTML = projects.map(function(project, index) {
+    const accent = accents[index % accents.length];
+    const icon = project.icon || (index % 2 ? 'fas fa-graduation-cap' : 'fas fa-bolt');
+    const highlights = Array.isArray(project.highlights) ? project.highlights : [];
+    const techStack = Array.isArray(project.tech_stack) ? project.tech_stack : [];
+    const link = project.live_url || project.play_store_url || project.app_store_url;
+    const imageUrl = project.thumbnail_url
+      ? (project.thumbnail_url.startsWith('http') ? project.thumbnail_url : getStorageUrl('project-images', project.thumbnail_url))
+      : null;
+    const image = imageUrl
+      ? '<img src="' + escapeHTML(imageUrl) + '" alt="' + escapeHTML(project.title) + '" class="w-full h-48 object-cover rounded-2xl mb-6" loading="lazy">'
+      : '';
+    const highlightsHTML = highlights.map(function(item) {
+      return '<div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>' + escapeHTML(item) + '</span></div>';
+    }).join('');
+    const techHTML = techStack.map(function(tech) {
+      return '<span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">' + escapeHTML(tech) + '</span>';
+    }).join('');
+    const linkHTML = link
+      ? '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 ' + accent.text + ' hover:text-white font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>'
+      : '';
+
+    return '<div class="glass-card p-8 lg:p-10 relative group reveal delay-' + (((index % 3) + 1) * 100) + '">' +
+      '<div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>' +
+      '<div class="relative z-10">' + image +
+        '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br ' + accent.card + ' flex items-center justify-center mb-6 shadow-lg ' + accent.shadow + '"><i class="' + escapeHTML(icon) + ' text-2xl text-white"></i></div>' +
+        '<h3 class="text-2xl lg:text-3xl font-bold mb-3">' + escapeHTML(project.title) + '</h3>' +
+        '<p class="text-slate-400 mb-6 leading-relaxed">' + escapeHTML(project.short_description || project.description || '') + '</p>' +
+        (highlightsHTML ? '<div class="space-y-3 mb-8">' + highlightsHTML + '</div>' : '') +
+        (techHTML ? '<div class="flex flex-wrap gap-2 mb-8">' + techHTML + '</div>' : '') +
+        linkHTML +
+      '</div>' +
+    '</div>';
+  }).join('');
+  initScrollReveal();
+}
+
+// ---- Services ----
+async function loadServicesContent() {
+  try {
+    const services = await fetchServices();
+    renderServices(services);
+  } catch (err) {
+    console.warn('Could not load services:', err);
+  }
+}
+
+function renderServices(services) {
+  const container = document.getElementById('services-container');
+  if (!container) return;
+  if (!services || services.length === 0) {
+    container.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-slate-500">Services are being updated. Check back soon.</p></div>';
+    return;
+  }
+
+  const colors = ['text-primary-400', 'text-accent-400', 'text-purple-400', 'text-pink-400', 'text-amber-400', 'text-green-400'];
+  container.innerHTML = services.map(function(service, index) {
+    const features = Array.isArray(service.features) ? service.features : [];
+    const featureHTML = features.map(function(feature) {
+      return '<div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check ' + colors[index % colors.length] + ' text-[10px]"></i>' + escapeHTML(feature) + '</div>';
+    }).join('');
+    return '<div class="glass-card p-6 text-center reveal delay-' + (((index % 4) + 1) * 100) + '">' +
+      '<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600/20 to-primary-600/5 flex items-center justify-center mx-auto mb-5"><i class="' + escapeHTML(service.icon || 'fas fa-code') + ' text-2xl ' + colors[index % colors.length] + '"></i></div>' +
+      '<h3 class="text-lg font-bold mb-3">' + escapeHTML(service.title) + '</h3>' +
+      '<p class="text-slate-400 text-sm mb-5 leading-relaxed">' + escapeHTML(service.description || '') + '</p>' +
+      (featureHTML ? '<div class="space-y-2 text-left">' + featureHTML + '</div>' : '') +
+    '</div>';
+  }).join('');
+
+  const serviceSelect = document.getElementById('inquiry-service');
+  if (serviceSelect) {
+    const currentValue = serviceSelect.value;
+    serviceSelect.innerHTML = '<option value="">Select a service</option>' + services.map(function(service) {
+      return '<option value="' + escapeHTML(service.title) + '">' + escapeHTML(service.title) + '</option>';
+    }).join('') + '<option value="Other">Other</option>';
+    serviceSelect.value = currentValue;
+  }
+  initScrollReveal();
 }
 
 // ---- Stats (dynamic from admin) ----

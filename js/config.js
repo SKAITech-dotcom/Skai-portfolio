@@ -186,6 +186,16 @@ async function fetchAllSiteSettings() {
   return settings;
 }
 
+async function fetchMediaAssets() {
+  const { data, error } = await _supabase
+    .from('media_assets')
+    .select('*')
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
 /**
  * Submit a contact/project inquiry
  */

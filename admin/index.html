@@ -330,7 +330,11 @@
         </a>
         <a class="nav-item" data-section="projects">
           <i class="fas fa-folder-open"></i>
-          <span>Projects</span>
+          <span>Websites & Apps</span>
+        </a>
+        <a class="nav-item" data-section="media">
+          <i class="fas fa-photo-video"></i>
+          <span>Media Library</span>
         </a>
         <a class="nav-item" data-section="services">
           <i class="fas fa-cogs"></i>
@@ -352,10 +356,6 @@
         <a class="nav-item" data-section="settings">
           <i class="fas fa-sliders-h"></i>
           <span>Site Settings</span>
-        </a>
-        <a class="nav-item" data-section="account">
-          <i class="fas fa-user-shield"></i>
-          <span>My Account</span>
         </a>
         <a class="nav-item" data-section="account">
           <i class="fas fa-user-shield"></i>
@@ -498,7 +498,10 @@
                 <i class="fas fa-user-plus"></i> Add Team Member
               </button>
               <button class="btn-primary text-sm" onclick="navigateTo('projects'); setTimeout(() => openProjectModal(), 300);">
-                <i class="fas fa-plus-circle"></i> Add Project
+                <i class="fas fa-plus-circle"></i> Add Website / App
+              </button>
+              <button class="btn-secondary text-sm" onclick="navigateTo('media'); setTimeout(() => openMediaModal(), 300);">
+                <i class="fas fa-upload"></i> Upload Image
               </button>
               <button class="btn-secondary text-sm" onclick="navigateTo('services'); setTimeout(() => openServiceModal(), 300);">
                 <i class="fas fa-wrench"></i> Add Service
@@ -583,6 +586,39 @@
                       </div>
                     </td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== SERVICES ===================== -->
+        <div id="section-media" class="section-content">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white">Media Library</h2>
+              <p class="text-sm text-slate-400 mt-1">Upload and reuse your brand images, project artwork, and team photos</p>
+            </div>
+            <button class="btn-primary text-sm" onclick="openMediaModal()">
+              <i class="fas fa-cloud-upload-alt"></i> Upload Image
+            </button>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Preview</th>
+                    <th>Name</th>
+                    <th>Alt Text</th>
+                    <th>Visible</th>
+                    <th>Added</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="media-table-body">
+                  <tr><td colspan="6"><div class="loading-spinner-container"><div class="spinner"></div></div></td></tr>
                 </tbody>
               </table>
             </div>
@@ -681,6 +717,9 @@
 
           <!-- Settings Tabs -->
           <div class="flex flex-wrap gap-2 mb-6">
+            <button class="settings-tab" data-settings-tab="brand" onclick="switchSettingsTab('brand')">
+              <i class="fas fa-palette mr-1.5"></i> Brand & Logo
+            </button>
             <button class="settings-tab active" data-settings-tab="hero" onclick="switchSettingsTab('hero')">
               <i class="fas fa-home mr-1.5"></i> Hero Section
             </button>
@@ -693,9 +732,52 @@
             <button class="settings-tab" data-settings-tab="about" onclick="switchSettingsTab('about')">
               <i class="fas fa-info-circle mr-1.5"></i> About
             </button>
+            <button class="settings-tab" data-settings-tab="stats" onclick="switchSettingsTab('stats')">
+              <i class="fas fa-chart-bar mr-1.5"></i> Stats
+            </button>
+            <button class="settings-tab" data-settings-tab="footer" onclick="switchSettingsTab('footer')">
+              <i class="fas fa-shoe-prints mr-1.5"></i> Footer
+            </button>
             <button class="settings-tab" data-settings-tab="password" onclick="switchSettingsTab('password')">
               <i class="fas fa-key mr-1.5"></i> Password
             </button>
+          </div>
+
+          <!-- Brand Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-brand">
+            <h3 class="text-lg font-semibold text-white mb-1"><i class="fas fa-palette text-primary-400 mr-2"></i>Brand & Logo</h3>
+            <p class="text-sm text-slate-400 mb-5">Control the name, logo, favicon, and short brand message shown across the public site.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+              <div>
+                <label class="form-label">Brand Name</label>
+                <input type="text" id="setting-brand-name" class="form-input" placeholder="SkaiTechgh">
+              </div>
+              <div>
+                <label class="form-label">Tagline</label>
+                <input type="text" id="setting-brand-tagline" class="form-input" placeholder="Digital experiences that drive growth">
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label">Logo Alt Text</label>
+                <input type="text" id="setting-brand-logo_alt" class="form-input" placeholder="SkaiTechgh logo">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+              <div>
+                <label class="form-label">Brand Logo</label>
+                <div class="file-upload-area" id="brand-logo-upload" onclick="document.getElementById('brand-logo-input').click()">
+                  <div id="brand-logo-preview"><i class="fas fa-image text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop logo</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, SVG up to 10MB</p></div>
+                </div>
+                <input type="file" id="brand-logo-input" accept="image/*,.svg" class="hidden" onchange="previewBrandImage(this, 'brand-logo-preview')">
+              </div>
+              <div>
+                <label class="form-label">Favicon (optional)</label>
+                <div class="file-upload-area" id="brand-favicon-upload" onclick="document.getElementById('brand-favicon-input').click()">
+                  <div id="brand-favicon-preview"><i class="fas fa-bolt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop favicon</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, SVG up to 10MB</p></div>
+                </div>
+                <input type="file" id="brand-favicon-input" accept="image/*,.svg" class="hidden" onchange="previewBrandImage(this, 'brand-favicon-preview')">
+              </div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('brand')"><i class="fas fa-save"></i> Save Brand Settings</button>
           </div>
 
           <!-- Hero Settings -->
@@ -792,6 +874,32 @@
             <button class="btn-primary text-sm" onclick="saveSettingsGroup('about')">
               <i class="fas fa-save"></i> Save About Settings
             </button>
+          </div>
+
+          <!-- Stats Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-stats">
+            <h3 class="text-lg font-semibold text-white mb-1"><i class="fas fa-chart-bar text-primary-400 mr-2"></i>Hero Stats</h3>
+            <p class="text-sm text-slate-400 mb-5">Edit the proof points displayed below the hero message.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+              <div><label class="form-label">Stat 1 Value</label><input type="text" id="setting-stats-1-value" class="form-input" placeholder="50+"></div>
+              <div><label class="form-label">Stat 1 Label</label><input type="text" id="setting-stats-1-label" class="form-input" placeholder="Projects Delivered"></div>
+              <div><label class="form-label">Stat 2 Value</label><input type="text" id="setting-stats-2-value" class="form-input" placeholder="20+"></div>
+              <div><label class="form-label">Stat 2 Label</label><input type="text" id="setting-stats-2-label" class="form-input" placeholder="Happy Clients"></div>
+              <div><label class="form-label">Stat 3 Value</label><input type="text" id="setting-stats-3-value" class="form-input" placeholder="5+"></div>
+              <div><label class="form-label">Stat 3 Label</label><input type="text" id="setting-stats-3-label" class="form-input" placeholder="Years Experience"></div>
+              <div><label class="form-label">Stat 4 Value</label><input type="text" id="setting-stats-4-value" class="form-input" placeholder="99%"></div>
+              <div><label class="form-label">Stat 4 Label</label><input type="text" id="setting-stats-4-label" class="form-input" placeholder="Client Satisfaction"></div>
+            </div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('stats')"><i class="fas fa-save"></i> Save Stats</button>
+          </div>
+
+          <!-- Footer Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-footer">
+            <h3 class="text-lg font-semibold text-white mb-1"><i class="fas fa-shoe-prints text-primary-400 mr-2"></i>Footer Content</h3>
+            <p class="text-sm text-slate-400 mb-5">Update the footer description and copyright line.</p>
+            <div class="mb-4"><label class="form-label">Footer Description</label><textarea id="setting-footer-description" class="form-input" rows="4" placeholder="Short description about your company..."></textarea></div>
+            <div class="mb-5"><label class="form-label">Copyright</label><input type="text" id="setting-footer-copyright" class="form-input" placeholder="© 2024 SkaiTechgh. All rights reserved."></div>
+            <button class="btn-primary text-sm" onclick="saveSettingsGroup('footer')"><i class="fas fa-save"></i> Save Footer</button>
           </div>
 
           <!-- Password Settings -->

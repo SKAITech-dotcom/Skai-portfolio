@@ -7,7 +7,7 @@
   <meta name="description" content="SkaiTechgh is a premier software engineering team crafting cutting-edge websites, mobile apps, and enterprise platforms for businesses across Africa and beyond.">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link id="site-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css">
@@ -59,8 +59,9 @@
       <div class="flex items-center justify-between h-16 lg:h-20">
         <!-- Logo -->
         <a href="#" class="flex items-center gap-2 group">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-primary-600/25 group-hover:shadow-primary-600/40 transition-shadow">S</div>
-          <span class="text-xl font-bold"><span class="gradient-text">Skai</span><span class="text-white">Techgh</span></span>
+          <div id="site-logo-mark" class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-primary-600/25 group-hover:shadow-primary-600/40 transition-shadow">S</div>
+          <img id="site-logo-image" src="" alt="" class="hidden w-10 h-10 rounded-xl object-contain bg-white/5 p-1">
+          <span id="site-brand-name" class="text-xl font-bold"><span class="gradient-text">Skai</span><span class="text-white">Techgh</span></span>
         </a>
 
         <!-- Desktop Navigation -->
@@ -132,7 +133,7 @@
           <a href="#portfolio" class="btn-primary text-base py-3.5 px-8"><i class="fas fa-th-large text-sm"></i> <span id="cta-primary-text">Explore Our Work</span></a>
           <a href="#contact" class="btn-secondary text-base py-3.5 px-8"><i class="fas fa-paper-plane text-sm"></i> <span id="cta-secondary-text">Start a Project</span></a>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto animate-[fadeInUp_0.8s_ease_0.6s_forwards] opacity-0" style="animation-fill-mode:forwards">
+        <div id="stats-bar" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto animate-[fadeInUp_0.8s_ease_0.6s_forwards] opacity-0" style="animation-fill-mode:forwards">
           <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">50+</div><div class="text-slate-400 text-sm font-medium">Projects Delivered</div></div>
           <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">20+</div><div class="text-slate-400 text-sm font-medium">Happy Clients</div></div>
           <div class="text-center p-4"><div class="text-3xl sm:text-4xl font-extrabold gradient-text mb-1">5+</div><div class="text-slate-400 text-sm font-medium">Years Experience</div></div>
@@ -157,52 +158,7 @@
         <p class="text-slate-400 max-w-2xl mx-auto text-lg">Innovative products built in-house, powering thousands of users across Ghana and beyond.</p>
       </div>
       <div id="flagship-container" class="grid md:grid-cols-2 gap-8 lg:gap-12">
-        <!-- SkaiTechgh Card -->
-        <div class="glass-card p-8 lg:p-10 relative group reveal delay-100">
-          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div class="relative z-10">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center mb-6 shadow-lg shadow-primary-600/25"><i class="fas fa-bolt text-2xl text-white"></i></div>
-            <h3 class="text-2xl lg:text-3xl font-bold mb-3">SkaiTech<span class="gradient-text">gh</span></h3>
-            <p class="text-slate-400 mb-6 leading-relaxed">Automated digital services platform powering mobile data purchases, airtime top-ups, utility bill payments, and a comprehensive agent store ecosystem. Built for speed, reliability, and scale.</p>
-            <div class="space-y-3 mb-8">
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Mobile Data & Airtime Top-ups</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Utility Bill Payments</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Agent Store Ecosystem</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>Mobile Money Integration</span></div>
-            </div>
-            <div class="flex flex-wrap gap-2 mb-8">
-              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">React</span>
-              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Node.js</span>
-              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">PostgreSQL</span>
-              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Redis</span>
-              <span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">Mobile Money</span>
-            </div>
-            <a href="#" class="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>
-          </div>
-        </div>
-        <!-- SkaiSchool Card -->
-        <div class="glass-card p-8 lg:p-10 relative group reveal delay-200">
-          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-accent-500/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div class="relative z-10">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-400 flex items-center justify-center mb-6 shadow-lg shadow-accent-500/25"><i class="fas fa-graduation-cap text-2xl text-white"></i></div>
-            <h3 class="text-2xl lg:text-3xl font-bold mb-3">Skai<span class="gradient-text-accent">School</span></h3>
-            <p class="text-slate-400 mb-6 leading-relaxed">Comprehensive school management and educational technology platform designed to digitize academic operations. From enrollment to graduation — everything in one place.</p>
-            <div class="space-y-3 mb-8">
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Student Enrollment & Attendance</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Grade & Exam Management</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Fee Processing & Finance</span></div>
-              <div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-cyan-400"></i><span>Parent Communication Portal</span></div>
-            </div>
-            <div class="flex flex-wrap gap-2 mb-8">
-              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Next.js</span>
-              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">TypeScript</span>
-              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Supabase</span>
-              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">Tailwind</span>
-              <span class="px-3 py-1 rounded-full bg-cyan-600/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">PWA</span>
-            </div>
-            <a href="#" class="inline-flex items-center gap-2 text-accent-400 hover:text-accent-500 font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>
-          </div>
-        </div>
+        <div class="col-span-full text-center py-12"><div class="spinner mx-auto mb-4"></div><p class="text-slate-500 text-sm">Loading products...</p></div>
       </div>
     </div>
   </section>
@@ -219,7 +175,9 @@
         <p class="text-slate-400 max-w-2xl mx-auto text-lg">End-to-end digital solutions tailored to transform your business and accelerate growth.</p>
       </div>
       <div id="services-container" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Service cards rendered by app.js with fallback content -->
+        <!-- Service cards rendered by app.js -->
+        <div class="col-span-full text-center py-12"><div class="spinner mx-auto mb-4"></div><p class="text-slate-500 text-sm">Loading services...</p></div>
+        <!--
         <div class="glass-card p-6 text-center reveal delay-100">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600/20 to-primary-600/5 flex items-center justify-center mx-auto mb-5"><i class="fas fa-globe text-2xl text-primary-400"></i></div>
           <h3 class="text-lg font-bold mb-3">Corporate & E-Commerce Websites</h3>
@@ -268,6 +226,7 @@
             <div class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-check text-pink-400 text-[10px]"></i>Digital Strategy</div>
           </div>
         </div>
+        -->
       </div>
     </div>
   </section>
@@ -436,10 +395,11 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-sm">S</div>
-            <span class="text-lg font-bold"><span class="gradient-text">Skai</span><span>Techgh</span></span>
+            <div id="footer-logo-mark" class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center font-bold text-white text-sm">S</div>
+            <img id="footer-logo-image" src="" alt="" class="hidden w-9 h-9 rounded-lg object-contain bg-white/5 p-1">
+            <span id="footer-brand-name" class="text-lg font-bold"><span class="gradient-text">Skai</span><span>Techgh</span></span>
           </div>
-          <p class="text-slate-400 text-sm leading-relaxed mb-5">Premier software engineering team crafting cutting-edge digital solutions for businesses across Africa and beyond.</p>
+          <p id="footer-description" class="text-slate-400 text-sm leading-relaxed mb-5">Premier software engineering team crafting cutting-edge digital solutions for businesses across Africa and beyond.</p>
           <div class="flex gap-3" id="footer-social-links">
             <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="GitHub"><i class="fab fa-github"></i></a>
             <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-sm" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -479,7 +439,7 @@
         </div>
       </div>
       <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-slate-500 text-sm">&copy; 2024 SkaiTechgh. All rights reserved.</p>
+        <p id="footer-copyright" class="text-slate-500 text-sm">&copy; 2024 SkaiTechgh. All rights reserved.</p>
         <div class="flex items-center gap-6">
           <a href="#" class="text-slate-500 hover:text-slate-300 text-sm transition-colors">Privacy Policy</a>
           <a href="#" class="text-slate-500 hover:text-slate-300 text-sm transition-colors">Terms of Service</a>

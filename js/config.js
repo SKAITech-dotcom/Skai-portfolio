@@ -7,8 +7,13 @@
 const SUPABASE_URL = 'https://njxxhfkzriiaclbtqqpv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_8N8nnPHTFw5miw4TA0-5jQ_1xkNc47g';
 
-// Initialize Supabase client
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize Supabase client before any other site script can use it.
+// Store it on window to avoid cross-script lexical-scope/TDZ collisions
+// when static hosting serves an older cached script alongside this one.
+if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+  throw new Error('Supabase SDK must load before js/config.js.');
+}
+window._supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Super Admin email — full CMS access
 const SUPER_ADMIN_EMAIL = 'skaitech360@gmail.com';
@@ -61,7 +66,7 @@ async function deleteFile(bucket, paths) {
  * Get the currently authenticated user
  */
 async function getCurrentUser() {
-  const { data: { user }, error } = await _supabase.auth.getUser();
+  const { data: { user }, error } = await window._supabase.auth.getUser();
   if (error) return null;
   return user;
 }
@@ -70,7 +75,7 @@ async function getCurrentUser() {
  * Sign in with email and password
  */
 async function signIn(email, password) {
-  const { data, error } = await _supabase.auth.signInWithPassword({
+  const { data, error } = await window._supabase.auth.signInWithPassword({
     email,
     password
   });
@@ -82,7 +87,7 @@ async function signIn(email, password) {
  * Sign up a new admin user (only super admin can do this)
  */
 async function signUp(email, password) {
-  const { data, error } = await _supabase.auth.signUp({
+  const { data, error } = await window._supabase.auth.signUp({
     email,
     password
   });
@@ -94,7 +99,7 @@ async function signUp(email, password) {
  * Sign out the current user
  */
 async function signOut() {
-  const { error } = await _supabase.auth.signOut();
+  const { error } = await window._supabase.auth.signOut();
   if (error) throw error;
   window.location.href = '/admin/';
 }

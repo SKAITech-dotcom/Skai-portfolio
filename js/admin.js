@@ -6,6 +6,10 @@
 // ============================================
 
 // ---- State ----
+if (!window._supabase) {
+  throw new Error('Supabase client is not initialized. Load js/config.js before js/admin.js.');
+}
+
 let currentUser = null;
 let currentSection = 'dashboard';
 let editingTeamMember = null;
@@ -39,7 +43,7 @@ async function initAuth() {
   }
 
   // Listen for auth state changes
-  _supabase.auth.onAuthStateChange((event, session) => {
+  window._supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       currentUser = session.user;
       showDashboard();
@@ -1941,9 +1945,9 @@ function initFileUploadDragDrop(areaId, inputId) {
 // ============================================
 
 function loadAccountInfo() {
-  const user = _supabase.auth.user && _supabase.auth.user() ? _supabase.auth.user() : null;
+  const user = window._supabase.auth.user && window._supabase.auth.user() ? window._supabase.auth.user() : null;
   // Try to get user from session
-  _supabase.auth.getSession().then(function(result) {
+  window._supabase.auth.getSession().then(function(result) {
     var session = result && result.data && result.data.session;
     if (session && session.user) {
       var email = session.user.email || 'admin@example.com';
@@ -2010,10 +2014,10 @@ async function handleChangePassword() {
 
   try {
     // Verify current password by re-authenticating
-    var sessionResult = await _supabase.auth.getSession();
+    var sessionResult = await window._supabase.auth.getSession();
     var email = sessionResult.data.session.user.email;
 
-    var signInResult = await _supabase.auth.signInWithPassword({
+    var signInResult = await window._supabase.auth.signInWithPassword({
       email: email,
       password: currentPw
     });
@@ -2022,7 +2026,7 @@ async function handleChangePassword() {
     }
 
     // Update password
-    var updateResult = await _supabase.auth.updateUser({ password: newPw });
+    var updateResult = await window._supabase.auth.updateUser({ password: newPw });
     if (updateResult.error) {
       throw updateResult.error;
     }
@@ -2079,10 +2083,10 @@ async function handleAccountChangePassword() {
   setButtonLoading(btn, true);
 
   try {
-    var sessionResult = await _supabase.auth.getSession();
+    var sessionResult = await window._supabase.auth.getSession();
     var email = sessionResult.data.session.user.email;
 
-    var signInResult = await _supabase.auth.signInWithPassword({
+    var signInResult = await window._supabase.auth.signInWithPassword({
       email: email,
       password: currentPw
     });
@@ -2090,7 +2094,7 @@ async function handleAccountChangePassword() {
       throw new Error('Current password is incorrect.');
     }
 
-    var updateResult = await _supabase.auth.updateUser({ password: newPw });
+    var updateResult = await window._supabase.auth.updateUser({ password: newPw });
     if (updateResult.error) {
       throw updateResult.error;
     }

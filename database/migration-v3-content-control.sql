@@ -55,15 +55,13 @@ INSERT INTO site_settings (key, value) VALUES
   }'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
--- Public image bucket used by the Media Library and the brand uploader.
+-- Public image buckets used by the Media Library, brand uploader, team photos,
+-- and project thumbnails/galleries.
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'site-media',
-  'site-media',
-  true,
-  10485760,
-  ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']
-)
+VALUES
+  ('site-media', 'site-media', true, 10485760, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']),
+  ('team-avatars', 'team-avatars', true, 5242880, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif']),
+  ('project-images', 'project-images', true, 10485760, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
 ON CONFLICT (id) DO UPDATE SET
   public = EXCLUDED.public,
   file_size_limit = EXCLUDED.file_size_limit,
@@ -74,41 +72,41 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects'
-      AND policyname = 'Public can view site media'
+      AND policyname = 'Public can view portfolio media'
   ) THEN
-    CREATE POLICY "Public can view site media"
+    CREATE POLICY "Public can view portfolio media"
       ON storage.objects FOR SELECT
-      USING (bucket_id = 'site-media');
+      USING (bucket_id IN ('site-media', 'team-avatars', 'project-images'));
   END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects'
-      AND policyname = 'Authenticated users can upload site media'
+      AND policyname = 'Authenticated users can upload portfolio media'
   ) THEN
-    CREATE POLICY "Authenticated users can upload site media"
+    CREATE POLICY "Authenticated users can upload portfolio media"
       ON storage.objects FOR INSERT TO authenticated
-      WITH CHECK (bucket_id = 'site-media');
+      WITH CHECK (bucket_id IN ('site-media', 'team-avatars', 'project-images'));
   END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects'
-      AND policyname = 'Authenticated users can update site media'
+      AND policyname = 'Authenticated users can update portfolio media'
   ) THEN
-    CREATE POLICY "Authenticated users can update site media"
+    CREATE POLICY "Authenticated users can update portfolio media"
       ON storage.objects FOR UPDATE TO authenticated
-      USING (bucket_id = 'site-media')
-      WITH CHECK (bucket_id = 'site-media');
+      USING (bucket_id IN ('site-media', 'team-avatars', 'project-images'))
+      WITH CHECK (bucket_id IN ('site-media', 'team-avatars', 'project-images'));
   END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects'
-      AND policyname = 'Authenticated users can delete site media'
+      AND policyname = 'Authenticated users can delete portfolio media'
   ) THEN
-    CREATE POLICY "Authenticated users can delete site media"
+    CREATE POLICY "Authenticated users can delete portfolio media"
       ON storage.objects FOR DELETE TO authenticated
-      USING (bucket_id = 'site-media');
+      USING (bucket_id IN ('site-media', 'team-avatars', 'project-images'));
   END IF;
 END $$;

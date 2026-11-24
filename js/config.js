@@ -11,7 +11,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_8N8nnPHTFw5miw4TA0-5jQ_1xkNc47g';
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Super Admin email — full CMS access
-const SUPER_ADMIN_EMAIL = 'seidumobiriahidu@gmail.com';
+const SUPER_ADMIN_EMAIL = 'skaitech360@gmail.com';
 
 // ============================================
 // Storage Helpers

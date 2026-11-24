@@ -185,6 +185,7 @@ function showDashboard() {
   loadServices();
   loadInquiries();
   loadSiteSettings();
+  loadAccountInfo();
 }
 
 // ============================================
@@ -213,7 +214,8 @@ function navigateTo(section) {
     projects: 'Projects',
     services: 'Services',
     inquiries: 'Client Inquiries',
-    settings: 'Site Settings'
+    settings: 'Site Settings',
+    account: 'My Account'
   };
   document.getElementById('topbar-title').textContent = titles[section] || 'Dashboard';
 
@@ -1689,4 +1691,178 @@ function initFileUploadDragDrop(areaId, inputId) {
       input.dispatchEvent(new Event('change'));
     }
   });
+}
+
+
+// ============================================
+// ACCOUNT & PASSWORD MANAGEMENT
+// ============================================
+
+function loadAccountInfo() {
+  const user = _supabase.auth.user && _supabase.auth.user() ? _supabase.auth.user() : null;
+  // Try to get user from session
+  _supabase.auth.getSession().then(function(result) {
+    var session = result && result.data && result.data.session;
+    if (session && session.user) {
+      var email = session.user.email || 'admin@example.com';
+      var initial = email.charAt(0).toUpperCase();
+      var accountAvatar = document.getElementById('account-avatar');
+      var accountEmail = document.getElementById('account-email-display');
+      if (accountAvatar) accountAvatar.textContent = initial;
+      if (accountEmail) accountEmail.textContent = email;
+    }
+  });
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  var icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+
+async function handleChangePassword() {
+  var currentPw = document.getElementById('current-password').value;
+  var newPw = document.getElementById('new-password').value;
+  var confirmPw = document.getElementById('confirm-password').value;
+  var successDiv = document.getElementById('password-change-success');
+  var errorDiv = document.getElementById('password-change-error');
+  var errorText = document.getElementById('password-error-text');
+  var btn = document.getElementById('change-password-btn');
+
+  successDiv.classList.add('hidden');
+  errorDiv.classList.add('hidden');
+
+  // Validation
+  if (!currentPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'Please enter your current password.';
+    return;
+  }
+  if (!newPw || newPw.length < 8) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New password must be at least 8 characters.';
+    return;
+  }
+  if (newPw !== confirmPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New passwords do not match.';
+    return;
+  }
+  if (currentPw === newPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New password must be different from current password.';
+    return;
+  }
+
+  var originalHTML = btn.innerHTML;
+  setButtonLoading(btn, true);
+
+  try {
+    // Verify current password by re-authenticating
+    var sessionResult = await _supabase.auth.getSession();
+    var email = sessionResult.data.session.user.email;
+
+    var signInResult = await _supabase.auth.signInWithPassword({
+      email: email,
+      password: currentPw
+    });
+    if (signInResult.error) {
+      throw new Error('Current password is incorrect.');
+    }
+
+    // Update password
+    var updateResult = await _supabase.auth.updateUser({ password: newPw });
+    if (updateResult.error) {
+      throw updateResult.error;
+    }
+
+    successDiv.classList.remove('hidden');
+    showToast('Password changed successfully!', 'success');
+    // Clear fields
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+  } catch (err) {
+    console.error('Password change error:', err);
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = err.message || 'Failed to change password. Please try again.';
+  } finally {
+    setButtonLoading(btn, false, originalHTML);
+  }
+}
+
+async function handleAccountChangePassword() {
+  var currentPw = document.getElementById('account-current-password').value;
+  var newPw = document.getElementById('account-new-password').value;
+  var confirmPw = document.getElementById('account-confirm-password').value;
+  var successDiv = document.getElementById('account-password-success');
+  var errorDiv = document.getElementById('account-password-error');
+  var errorText = document.getElementById('account-password-error-text');
+  var btn = document.getElementById('account-change-password-btn');
+
+  successDiv.classList.add('hidden');
+  errorDiv.classList.add('hidden');
+
+  if (!currentPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'Please enter your current password.';
+    return;
+  }
+  if (!newPw || newPw.length < 8) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New password must be at least 8 characters.';
+    return;
+  }
+  if (newPw !== confirmPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New passwords do not match.';
+    return;
+  }
+  if (currentPw === newPw) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'New password must be different from current password.';
+    return;
+  }
+
+  var originalHTML = btn.innerHTML;
+  setButtonLoading(btn, true);
+
+  try {
+    var sessionResult = await _supabase.auth.getSession();
+    var email = sessionResult.data.session.user.email;
+
+    var signInResult = await _supabase.auth.signInWithPassword({
+      email: email,
+      password: currentPw
+    });
+    if (signInResult.error) {
+      throw new Error('Current password is incorrect.');
+    }
+
+    var updateResult = await _supabase.auth.updateUser({ password: newPw });
+    if (updateResult.error) {
+      throw updateResult.error;
+    }
+
+    successDiv.classList.remove('hidden');
+    showToast('Password changed successfully!', 'success');
+    document.getElementById('account-current-password').value = '';
+    document.getElementById('account-new-password').value = '';
+    document.getElementById('account-confirm-password').value = '';
+  } catch (err) {
+    console.error('Password change error:', err);
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = err.message || 'Failed to change password. Please try again.';
+  } finally {
+    setButtonLoading(btn, false, originalHTML);
+  }
 }

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>SkaiTechgh — Admin Dashboard</title>
+  <title>SkaiTechgh â€” Admin Dashboard</title>
 
   <!-- Styles & Fonts -->
   <link rel="stylesheet" href="../css/styles.css">
@@ -270,7 +270,7 @@
             <label for="login-password" class="form-label">Password</label>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-lock text-sm"></i></span>
-              <input type="password" id="login-password" class="form-input pl-10" placeholder="••••••••" required autocomplete="current-password">
+              <input type="password" id="login-password" class="form-input pl-10" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="current-password">
               <button type="button" id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors" aria-label="Toggle password visibility">
                 <i class="fas fa-eye text-sm"></i>
               </button>
@@ -353,6 +353,14 @@
           <i class="fas fa-sliders-h"></i>
           <span>Site Settings</span>
         </a>
+        <a class="nav-item" data-section="account">
+          <i class="fas fa-user-shield"></i>
+          <span>My Account</span>
+        </a>
+        <a class="nav-item" data-section="account">
+          <i class="fas fa-user-shield"></i>
+          <span>My Account</span>
+        </a>
       </nav>
 
       <!-- User / Sign Out -->
@@ -414,7 +422,7 @@
                 </div>
                 <span class="text-xs text-blue-400 font-medium bg-blue-500/10 px-2 py-1 rounded-full">Team</span>
               </div>
-              <p class="text-2xl font-bold text-white" id="stat-team">—</p>
+              <p class="text-2xl font-bold text-white" id="stat-team">â€”</p>
               <p class="text-sm text-slate-400 mt-1">Total Members</p>
             </div>
             <!-- Projects -->
@@ -425,7 +433,7 @@
                 </div>
                 <span class="text-xs text-purple-400 font-medium bg-purple-500/10 px-2 py-1 rounded-full">Projects</span>
               </div>
-              <p class="text-2xl font-bold text-white" id="stat-projects">—</p>
+              <p class="text-2xl font-bold text-white" id="stat-projects">â€”</p>
               <p class="text-sm text-slate-400 mt-1">Total Projects</p>
             </div>
             <!-- Services -->
@@ -436,7 +444,7 @@
                 </div>
                 <span class="text-xs text-cyan-400 font-medium bg-cyan-500/10 px-2 py-1 rounded-full">Services</span>
               </div>
-              <p class="text-2xl font-bold text-white" id="stat-services">—</p>
+              <p class="text-2xl font-bold text-white" id="stat-services">â€”</p>
               <p class="text-sm text-slate-400 mt-1">Active Services</p>
             </div>
             <!-- New Inquiries -->
@@ -447,7 +455,7 @@
                 </div>
                 <span class="text-xs text-amber-400 font-medium bg-amber-500/10 px-2 py-1 rounded-full">New</span>
               </div>
-              <p class="text-2xl font-bold text-white" id="stat-inquiries">—</p>
+              <p class="text-2xl font-bold text-white" id="stat-inquiries">â€”</p>
               <p class="text-sm text-slate-400 mt-1">New Inquiries</p>
             </div>
           </div>
@@ -456,7 +464,7 @@
           <div class="glass-card p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold text-white">Recent Inquiries</h3>
-              <a class="text-sm text-primary-400 hover:text-primary-300 cursor-pointer" onclick="navigateTo('inquiries')">View All →</a>
+              <a class="text-sm text-primary-400 hover:text-primary-300 cursor-pointer" onclick="navigateTo('inquiries')">View All â†’</a>
             </div>
             <div class="overflow-x-auto">
               <table class="admin-table">
@@ -685,6 +693,9 @@
             <button class="settings-tab" data-settings-tab="about" onclick="switchSettingsTab('about')">
               <i class="fas fa-info-circle mr-1.5"></i> About
             </button>
+            <button class="settings-tab" data-settings-tab="password" onclick="switchSettingsTab('password')">
+              <i class="fas fa-key mr-1.5"></i> Password
+            </button>
           </div>
 
           <!-- Hero Settings -->
@@ -780,6 +791,115 @@
             </div>
             <button class="btn-primary text-sm" onclick="saveSettingsGroup('about')">
               <i class="fas fa-save"></i> Save About Settings
+            </button>
+          </div>
+
+          <!-- Password Settings -->
+          <div class="settings-panel glass-card p-6" id="settings-password">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-key text-primary-400 mr-2"></i>Change Password</h3>
+            <div id="password-change-success" class="hidden mb-4 p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm">
+              <i class="fas fa-check-circle mr-2"></i>Password changed successfully!
+            </div>
+            <div id="password-change-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm">
+              <i class="fas fa-exclamation-circle mr-2"></i><span id="password-error-text"></span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="md:col-span-2">
+                <label class="form-label">Current Password</label>
+                <div class="relative">
+                  <input type="password" id="current-password" class="form-input pr-10" placeholder="Enter current password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('current-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="form-label">New Password</label>
+                <div class="relative">
+                  <input type="password" id="new-password" class="form-input pr-10" placeholder="Enter new password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('new-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Minimum 8 characters</p>
+              </div>
+              <div>
+                <label class="form-label">Confirm New Password</label>
+                <div class="relative">
+                  <input type="password" id="confirm-password" class="form-input pr-10" placeholder="Confirm new password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('confirm-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button class="btn-primary text-sm" id="change-password-btn" onclick="handleChangePassword()">
+              <i class="fas fa-lock"></i> Change Password
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ===================== MY ACCOUNT ===================== -->
+        <div id="section-account" class="section-content">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold text-white">My Account</h2>
+            <p class="text-sm text-slate-400 mt-1">Manage your account settings and security</p>
+          </div>
+
+          <!-- Account Info Card -->
+          <div class="glass-card p-6 mb-6">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-user text-primary-400 mr-2"></i>Account Information</h3>
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-2xl font-bold" id="account-avatar">A</div>
+              <div>
+                <p class="text-white font-semibold text-lg" id="account-email-display">admin@example.com</p>
+                <p class="text-sm text-slate-400">Administrator</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password Card -->
+          <div class="glass-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-key text-primary-400 mr-2"></i>Change Password</h3>
+            <div id="account-password-success" class="hidden mb-4 p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm">
+              <i class="fas fa-check-circle mr-2"></i>Password changed successfully!
+            </div>
+            <div id="account-password-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm">
+              <i class="fas fa-exclamation-circle mr-2"></i><span id="account-password-error-text"></span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="md:col-span-2">
+                <label class="form-label">Current Password</label>
+                <div class="relative">
+                  <input type="password" id="account-current-password" class="form-input pr-10" placeholder="Enter current password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('account-current-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="form-label">New Password</label>
+                <div class="relative">
+                  <input type="password" id="account-new-password" class="form-input pr-10" placeholder="Enter new password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('account-new-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Minimum 8 characters</p>
+              </div>
+              <div>
+                <label class="form-label">Confirm New Password</label>
+                <div class="relative">
+                  <input type="password" id="account-confirm-password" class="form-input pr-10" placeholder="Confirm new password">
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" onclick="togglePasswordVisibility('account-confirm-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button class="btn-primary text-sm" id="account-change-password-btn" onclick="handleAccountChangePassword()">
+              <i class="fas fa-lock"></i> Change Password
             </button>
           </div>
         </div>

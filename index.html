@@ -6,6 +6,20 @@
   <title>SkaiTechgh — Premier Software Engineering & Digital Solutions</title>
   <meta name="description" content="SkaiTechgh is a premier software engineering team crafting cutting-edge websites, mobile apps, and enterprise platforms for businesses across Africa and beyond.">
 
+  <!-- Supabase may return recovery links to the configured site root. Forward them to the reset form. -->
+  <script>
+    (function () {
+      var hasRecoveryHash = window.location.hash.indexOf('type=recovery') !== -1;
+      var hasRecoveryCode = new URLSearchParams(window.location.search).has('code');
+      if (hasRecoveryHash || hasRecoveryCode) {
+        var resetUrl = new URL('reset-password.html', window.location.href);
+        resetUrl.search = window.location.search;
+        resetUrl.hash = window.location.hash;
+        window.location.replace(resetUrl.href);
+      }
+    })();
+  </script>
+
   <!-- Favicon -->
   <link id="site-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 

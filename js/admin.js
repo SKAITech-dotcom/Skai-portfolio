@@ -77,6 +77,11 @@ function initEventListeners() {
     });
   }
 
+  const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+  if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener('click', handlePasswordResetRequest);
+  }
+
   // Sign out
   const signOutBtn = document.getElementById('sign-out-btn');
   if (signOutBtn) {
@@ -151,6 +156,27 @@ async function handleLogin(e) {
     errorText.textContent = err.message || 'Invalid email or password. Please try again.';
     btn.classList.remove('btn-loading');
     btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Sign In</span>';
+  }
+}
+
+async function handlePasswordResetRequest() {
+  const email = document.getElementById('login-email').value.trim();
+  const errorDiv = document.getElementById('login-error');
+  const errorText = document.getElementById('login-error-text');
+
+  if (!email) {
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = 'Enter your email address first.';
+    return;
+  }
+
+  try {
+    await requestPasswordReset(email);
+    showToast('Password reset email sent. Check your inbox and spam folder.', 'success', 6000);
+  } catch (err) {
+    console.error('Password reset request error:', err);
+    errorDiv.classList.remove('hidden');
+    errorText.textContent = err.message || 'Could not send the password reset email.';
   }
 }
 
@@ -348,22 +374,22 @@ function setButtonLoading(btn, loading, originalHTML) {
 async function loadDashboardStats() {
   try {
     // Team members count
-    const { count: teamCount, error: teamErr } = await _supabase
+    const { count: teamCount, error: teamErr } = await window._supabase
       .from('team_members').select('*', { count: 'exact', head: true });
     if (!teamErr) document.getElementById('stat-team').textContent = teamCount || 0;
 
     // Projects count
-    const { count: projCount, error: projErr } = await _supabase
+    const { count: projCount, error: projErr } = await window._supabase
       .from('projects').select('*', { count: 'exact', head: true });
     if (!projErr) document.getElementById('stat-projects').textContent = projCount || 0;
 
     // Services count
-    const { count: svcCount, error: svcErr } = await _supabase
+    const { count: svcCount, error: svcErr } = await window._supabase
       .from('services').select('*', { count: 'exact', head: true });
     if (!svcErr) document.getElementById('stat-services').textContent = svcCount || 0;
 
     // New inquiries count
-    const { count: inqCount, error: inqErr } = await _supabase
+    const { count: inqCount, error: inqErr } = await window._supabase
       .from('inquiries').select('*', { count: 'exact', head: true })
       .eq('status', 'new');
     if (!inqErr) {
@@ -394,7 +420,7 @@ function updateInquiryBadges(count) {
 async function loadRecentInquiries() {
   const tbody = document.getElementById('recent-inquiries-body');
   try {
-    const { data, error } = await _supabase
+    const { data, error } = await window._supabase
       .from('inquiries')
       .select('*')
       .order('created_at', { ascending: false })
@@ -435,7 +461,7 @@ async function loadRecentInquiries() {
 async function loadTeamMembers() {
   const tbody = document.getElementById('team-table-body');
   try {
-    const { data, error } = await _supabase
+    const { data, error } = await window._supabase
       .from('team_members')
       .select('*')
       .order('display_order', { ascending: true });
@@ -487,7 +513,7 @@ async function loadTeamMembers() {
 
 async function toggleTeamVisibility(id, newValue) {
   try {
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('team_members')
       .update({ is_visible: newValue })
       .eq('id', id);
@@ -504,7 +530,7 @@ async function openTeamModal(memberId) {
   let member = null;
   if (memberId) {
     try {
-      const { data, error } = await _supabase
+      const { data, error } = await window._supabase
         .from('team_members')
         .select('*')
         .eq('id', memberId)
@@ -652,7 +678,7 @@ async function saveTeamMember(e) {
 
     if (editingTeamMember) {
       // Update
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('team_members')
         .update(memberData)
         .eq('id', editingTeamMember.id);
@@ -660,7 +686,7 @@ async function saveTeamMember(e) {
       showToast('Team member updated successfully!', 'success');
     } else {
       // Insert
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('team_members')
         .insert([memberData]);
       if (error) throw error;
@@ -690,7 +716,7 @@ async function deleteTeamMember(id, photoPath) {
       }
     }
 
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('team_members')
       .delete()
       .eq('id', id);
@@ -713,7 +739,7 @@ async function deleteTeamMember(id, photoPath) {
 async function loadProjects() {
   const tbody = document.getElementById('projects-table-body');
   try {
-    const { data, error } = await _supabase
+    const { data, error } = await window._supabase
       .from('projects')
       .select('*')
       .order('display_order', { ascending: true });
@@ -773,7 +799,7 @@ async function openProjectModal(projectId) {
   let project = null;
   if (projectId) {
     try {
-      const { data, error } = await _supabase
+      const { data, error } = await window._supabase
         .from('projects')
         .select('*')
         .eq('id', projectId)
@@ -1061,14 +1087,14 @@ async function saveProject(e) {
     };
 
     if (editingProject) {
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('projects')
         .update(projectData)
         .eq('id', editingProject.id);
       if (error) throw error;
       showToast('Project updated successfully!', 'success');
     } else {
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('projects')
         .insert([projectData]);
       if (error) throw error;
@@ -1094,7 +1120,7 @@ async function deleteProject(id) {
 
   try {
     // Fetch project to get image paths
-    const { data: proj } = await _supabase
+    const { data: proj } = await window._supabase
       .from('projects')
       .select('thumbnail_url, images')
       .eq('id', id)
@@ -1116,7 +1142,7 @@ async function deleteProject(id) {
       }
     }
 
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('projects')
       .delete()
       .eq('id', id);
@@ -1212,7 +1238,7 @@ async function saveMediaAsset(e) {
     const ext = getFileExtension(file.name);
     const path = `library/${generateUUID()}.${ext}`;
     const fileUrl = await uploadFile('site-media', path, file);
-    const { error } = await _supabase.from('media_assets').insert([{
+    const { error } = await window._supabase.from('media_assets').insert([{
       name: document.getElementById('media-name').value.trim(),
       file_path: path,
       file_url: fileUrl,
@@ -1234,7 +1260,7 @@ async function saveMediaAsset(e) {
 
 async function toggleMediaVisibility(id, newValue) {
   try {
-    const { error } = await _supabase.from('media_assets').update({ is_visible: newValue }).eq('id', id);
+    const { error } = await window._supabase.from('media_assets').update({ is_visible: newValue }).eq('id', id);
     if (error) throw error;
     loadMediaAssets();
   } catch (err) {
@@ -1245,7 +1271,7 @@ async function toggleMediaVisibility(id, newValue) {
 async function deleteMediaAsset(id, filePath) {
   if (!confirm('Delete this media file? This cannot be undone.')) return;
   try {
-    const { error } = await _supabase.from('media_assets').delete().eq('id', id);
+    const { error } = await window._supabase.from('media_assets').delete().eq('id', id);
     if (error) throw error;
     if (filePath) {
       try { await deleteFile('site-media', filePath); } catch (storageError) { console.warn('Storage cleanup failed:', storageError); }
@@ -1274,7 +1300,7 @@ async function copyMediaUrl(url) {
 async function loadServices() {
   const tbody = document.getElementById('services-table-body');
   try {
-    const { data, error } = await _supabase
+    const { data, error } = await window._supabase
       .from('services')
       .select('*')
       .order('display_order', { ascending: true });
@@ -1320,7 +1346,7 @@ async function loadServices() {
 
 async function toggleServiceVisibility(id, newValue) {
   try {
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('services')
       .update({ is_visible: newValue })
       .eq('id', id);
@@ -1337,7 +1363,7 @@ async function openServiceModal(serviceId) {
   let service = null;
   if (serviceId) {
     try {
-      const { data, error } = await _supabase
+      const { data, error } = await window._supabase
         .from('services')
         .select('*')
         .eq('id', serviceId)
@@ -1459,14 +1485,14 @@ async function saveService(e) {
     };
 
     if (editingService) {
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('services')
         .update(serviceData)
         .eq('id', editingService.id);
       if (error) throw error;
       showToast('Service updated successfully!', 'success');
     } else {
-      const { error } = await _supabase
+      const { error } = await window._supabase
         .from('services')
         .insert([serviceData]);
       if (error) throw error;
@@ -1487,7 +1513,7 @@ async function deleteService(id) {
   if (!confirm('Are you sure you want to delete this service? This action cannot be undone.')) return;
 
   try {
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('services')
       .delete()
       .eq('id', id);
@@ -1512,7 +1538,7 @@ async function loadInquiries(statusFilter) {
   const filter = statusFilter || document.getElementById('inquiry-status-filter')?.value || 'all';
 
   try {
-    let query = _supabase
+    let query = window._supabase
       .from('inquiries')
       .select('*')
       .order('created_at', { ascending: false });
@@ -1561,7 +1587,7 @@ async function loadInquiries(statusFilter) {
 async function openInquiryModal(inquiryId) {
   let inquiry = null;
   try {
-    const { data, error } = await _supabase
+    const { data, error } = await window._supabase
       .from('inquiries')
       .select('*')
       .eq('id', inquiryId)
@@ -1661,7 +1687,7 @@ async function updateInquiryStatus(e) {
     const status = document.getElementById('inq-status').value;
     const adminNotes = document.getElementById('inq-admin-notes').value.trim();
 
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('inquiries')
       .update({ status, admin_notes: adminNotes })
       .eq('id', viewingInquiry.id);
@@ -1879,7 +1905,7 @@ async function saveSettingsGroup(group) {
     }
 
     // Upsert into site_settings
-    const { error } = await _supabase
+    const { error } = await window._supabase
       .from('site_settings')
       .upsert({ key: group, value: value }, { onConflict: 'key' });
 

@@ -21,3 +21,12 @@ Run these SQL files in the Supabase SQL Editor, in order:
 The third migration creates the `media_assets` table, adds project presentation fields, seeds brand settings, and creates the public `site-media` storage bucket plus authenticated upload policies.
 
 The admin login uses Supabase Auth. Confirm `skaitech360@gmail.com` in Supabase Auth before signing in at `/admin/`; the password is intentionally not stored in this repository.
+
+### Password reset URL
+
+In Supabase **Authentication → URL Configuration**, set:
+
+- Site URL: `https://skaiteam.wasmer.app`
+- Redirect URL: `https://skaiteam.wasmer.app/reset-password.html`
+
+The admin login's **Forgot password?** action uses that Wasmer reset URL, and `reset-password.html` accepts the recovery link and updates the password without a server.

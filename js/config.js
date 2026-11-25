@@ -6,6 +6,7 @@
 
 const SUPABASE_URL = 'https://njxxhfkzriiaclbtqqpv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_8N8nnPHTFw5miw4TA0-5jQ_1xkNc47g';
+window.PASSWORD_RESET_REDIRECT_URL = 'https://skaiteam.wasmer.app/reset-password.html';
 
 // Initialize Supabase client before any other site script can use it.
 // Store it on window to avoid cross-script lexical-scope/TDZ collisions
@@ -29,7 +30,7 @@ function getStorageUrl(bucket, path) {
   if (!path) return null;
   // If it's already a full URL, return as-is
   if (path.startsWith('http')) return path;
-  const { data } = _supabase.storage.from(bucket).getPublicUrl(path);
+  const { data } = window._supabase.storage.from(bucket).getPublicUrl(path);
   return data?.publicUrl || null;
 }
 
@@ -37,7 +38,7 @@ function getStorageUrl(bucket, path) {
  * Upload a file to Supabase Storage
  */
 async function uploadFile(bucket, path, file) {
-  const { data, error } = await _supabase.storage
+  const { data, error } = await window._supabase.storage
     .from(bucket)
     .upload(path, file, {
       cacheControl: '3600',
@@ -52,7 +53,7 @@ async function uploadFile(bucket, path, file) {
  */
 async function deleteFile(bucket, paths) {
   const pathArray = Array.isArray(paths) ? paths : [paths];
-  const { error } = await _supabase.storage
+  const { error } = await window._supabase.storage
     .from(bucket)
     .remove(pathArray);
   if (error) throw error;
@@ -81,6 +82,13 @@ async function signIn(email, password) {
   });
   if (error) throw error;
   return data;
+}
+
+async function requestPasswordReset(email) {
+  const { error } = await window._supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.PASSWORD_RESET_REDIRECT_URL
+  });
+  if (error) throw error;
 }
 
 /**
@@ -116,7 +124,7 @@ function isSuperAdmin(user) {
 // ============================================
 
 async function fetchTeamMembers() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('team_members')
     .select('*')
     .eq('is_visible', true)
@@ -126,7 +134,7 @@ async function fetchTeamMembers() {
 }
 
 async function fetchProjects(category = null) {
-  let query = _supabase
+  let query = window._supabase
     .from('projects')
     .select('*')
     .eq('status', 'published')
@@ -141,7 +149,7 @@ async function fetchProjects(category = null) {
 }
 
 async function fetchFlagshipProjects() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('projects')
     .select('*')
     .eq('is_flagship', true)
@@ -152,7 +160,7 @@ async function fetchFlagshipProjects() {
 }
 
 async function fetchServices() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('services')
     .select('*')
     .eq('is_visible', true)
@@ -162,7 +170,7 @@ async function fetchServices() {
 }
 
 async function fetchTestimonials() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('testimonials')
     .select('*')
     .eq('is_visible', true)
@@ -172,7 +180,7 @@ async function fetchTestimonials() {
 }
 
 async function fetchSiteSetting(key) {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('site_settings')
     .select('value')
     .eq('key', key)
@@ -182,7 +190,7 @@ async function fetchSiteSetting(key) {
 }
 
 async function fetchAllSiteSettings() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('site_settings')
     .select('*');
   if (error) throw error;
@@ -192,7 +200,7 @@ async function fetchAllSiteSettings() {
 }
 
 async function fetchMediaAssets() {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('media_assets')
     .select('*')
     .order('display_order', { ascending: true })
@@ -205,7 +213,7 @@ async function fetchMediaAssets() {
  * Submit a contact/project inquiry
  */
 async function submitInquiry(inquiryData) {
-  const { data, error } = await _supabase
+  const { data, error } = await window._supabase
     .from('inquiries')
     .insert([inquiryData])
     .select();

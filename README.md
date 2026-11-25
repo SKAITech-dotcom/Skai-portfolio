@@ -7,8 +7,9 @@ The public portfolio is backed by Supabase and the `/admin/` dashboard controls 
 - Websites, mobile apps, web apps, and flagship products through **Websites & Apps**.
 - Project thumbnails, galleries, app-store links, icons, highlights, visibility, status, and ordering.
 - Services, team members, testimonials, inquiries, hero copy, contact details, social links, stats, and footer copy.
-- A reusable **Media Library** for uploaded images.
+- A reusable **Media Library** for uploaded images and videos.
 - Brand name, logo, favicon, and logo alt text through **Brand & Logo** settings.
+- Contact inquiries are saved in Supabase and can also open a pre-filled email to `skaitech360@gmail.com`.
 
 ### Supabase setup
 
@@ -17,8 +18,9 @@ Run these SQL files in the Supabase SQL Editor, in order:
 1. `database/schema.sql`
 2. `database/migration-v2.sql`
 3. `database/migration-v3-content-control.sql`
+4. `database/migration-v4-skai-tech-solutions.sql`
 
-The third migration creates the `media_assets` table, adds project presentation fields, seeds brand settings, and creates the public `site-media` storage bucket plus authenticated upload policies.
+The third migration creates the `media_assets` table, adds project presentation fields, seeds the content-control settings, and creates the public storage buckets plus authenticated upload policies. The fourth migration sets the SkaiTech Solutions contact details, adds project video links, and enables common image/video uploads up to 50MB.
 
 The admin login uses Supabase Auth. Confirm `skaitech360@gmail.com` in Supabase Auth before signing in at `/admin/`; the password is intentionally not stored in this repository.
 

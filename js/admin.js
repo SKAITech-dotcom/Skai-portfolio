@@ -878,10 +878,14 @@ async function openProjectModal(projectId) {
         <div id="proj-tech-tags" class="flex flex-wrap gap-2 mt-2"></div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label class="form-label">Live URL</label>
           <input type="url" id="proj-live-url" class="form-input" value="${escapeHtml(project?.live_url || '')}" placeholder="https://example.com">
+        </div>
+        <div>
+          <label class="form-label">Video URL</label>
+          <input type="url" id="proj-video-url" class="form-input" value="${escapeHtml(project?.video_url || '')}" placeholder="https://youtube.com/watch?v=...">
         </div>
         <div>
           <label class="form-label">GitHub URL</label>
@@ -1076,6 +1080,7 @@ async function saveProject(e) {
       category: document.getElementById('proj-category').value,
       tech_stack: techStack,
       live_url: document.getElementById('proj-live-url').value.trim(),
+      video_url: document.getElementById('proj-video-url').value.trim(),
       github_url: document.getElementById('proj-github-url').value.trim(),
       icon: document.getElementById('proj-icon').value.trim() || 'fas fa-code',
       highlights: document.getElementById('proj-highlights').value.split(',').map(t => t.trim()).filter(Boolean),
@@ -1168,12 +1173,15 @@ async function loadMediaAssets() {
   try {
     const media = await fetchMediaAssets();
     if (!media.length) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-photo-video block"></i><p>No media yet. Upload your first image.</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-photo-video block"></i><p>No media yet. Upload your first image or video.</p></div></td></tr>';
       return;
     }
     tbody.innerHTML = media.map(asset => `
       <tr>
-        <td><img src="${escapeHtml(asset.file_url)}" alt="${escapeHtml(asset.alt_text || asset.name)}" class="w-16 h-12 rounded-lg object-cover border border-primary-500/20"></td>
+        <td>${asset.media_type === 'video'
+          ? `<video src="${escapeHtml(asset.file_url)}" class="w-16 h-12 rounded-lg object-cover border border-primary-500/20" muted></video>`
+          : `<img src="${escapeHtml(asset.file_url)}" alt="${escapeHtml(asset.alt_text || asset.name)}" class="w-16 h-12 rounded-lg object-cover border border-primary-500/20">`
+        }</td>
         <td class="font-medium text-white">${escapeHtml(asset.name)}</td>
         <td class="text-slate-400">${escapeHtml(asset.alt_text || '—')}</td>
         <td><div class="toggle-switch ${asset.is_visible ? 'active' : ''}" onclick="toggleMediaVisibility('${asset.id}', ${!asset.is_visible})" title="${asset.is_visible ? 'Visible' : 'Hidden'}"></div></td>
@@ -1196,11 +1204,11 @@ function openMediaModal() {
     </div>
     <form id="media-form" onsubmit="saveMediaAsset(event)">
       <div class="mb-5">
-        <label class="form-label">Image File *</label>
+        <label class="form-label">Image or Video File *</label>
         <div class="file-upload-area" id="media-upload" onclick="document.getElementById('media-input').click()">
-          <div id="media-preview"><i class="fas fa-cloud-upload-alt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop to upload</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, GIF, SVG up to 10MB</p></div>
+          <div id="media-preview"><i class="fas fa-cloud-upload-alt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop to upload</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, GIF, SVG, MP4, WebM up to 50MB</p></div>
         </div>
-        <input type="file" id="media-input" accept="image/*,.svg" class="hidden" onchange="previewMediaImage(this)">
+        <input type="file" id="media-input" accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime,.svg" class="hidden" onchange="previewMediaImage(this)">
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div><label class="form-label">Name *</label><input type="text" id="media-name" class="form-input" required placeholder="Homepage hero image"></div>
@@ -1210,7 +1218,7 @@ function openMediaModal() {
         <div><label class="form-label">Display Order</label><input type="number" id="media-order" class="form-input" min="0" value="0"></div>
         <div class="flex items-center gap-3 pt-6"><input type="checkbox" id="media-visible" class="w-5 h-5 rounded accent-primary-500 cursor-pointer" checked><label for="media-visible" class="form-label mb-0 cursor-pointer">Publicly visible</label></div>
       </div>
-      <div class="flex justify-end gap-3"><button type="button" class="btn-secondary text-sm py-2" onclick="closeModal()">Cancel</button><button type="submit" id="media-save-btn" class="btn-primary text-sm py-2"><i class="fas fa-upload"></i> Upload Image</button></div>
+      <div class="flex justify-end gap-3"><button type="button" class="btn-secondary text-sm py-2" onclick="closeModal()">Cancel</button><button type="submit" id="media-save-btn" class="btn-primary text-sm py-2"><i class="fas fa-upload"></i> Upload Media</button></div>
     </form>
   `;
   openModal(html);
@@ -1219,11 +1227,15 @@ function openMediaModal() {
 
 function previewMediaImage(input) {
   if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
   const reader = new FileReader();
   reader.onload = event => {
-    document.getElementById('media-preview').innerHTML = `<img src="${event.target.result}" alt="Preview" class="mx-auto max-h-32 rounded-lg"><p class="text-xs text-slate-400 mt-2">Click to change</p>`;
+    const preview = file.type.startsWith('video/')
+      ? `<video src="${event.target.result}" controls class="mx-auto max-h-32 rounded-lg"></video>`
+      : `<img src="${event.target.result}" alt="Preview" class="mx-auto max-h-32 rounded-lg">`;
+    document.getElementById('media-preview').innerHTML = preview + '<p class="text-xs text-slate-400 mt-2">Click to change</p>';
   };
-  reader.readAsDataURL(input.files[0]);
+  reader.readAsDataURL(file);
 }
 
 async function saveMediaAsset(e) {
@@ -1233,7 +1245,7 @@ async function saveMediaAsset(e) {
   setButtonLoading(btn, true);
   try {
     const input = document.getElementById('media-input');
-    if (!input.files || !input.files[0]) throw new Error('Please choose an image first.');
+    if (!input.files || !input.files[0]) throw new Error('Please choose an image or video first.');
     const file = input.files[0];
     const ext = getFileExtension(file.name);
     const path = `library/${generateUUID()}.${ext}`;
@@ -1243,17 +1255,17 @@ async function saveMediaAsset(e) {
       file_path: path,
       file_url: fileUrl,
       alt_text: document.getElementById('media-alt').value.trim(),
-      media_type: 'image',
+      media_type: file.type.startsWith('video/') ? 'video' : 'image',
       display_order: parseInt(document.getElementById('media-order').value) || 0,
       is_visible: document.getElementById('media-visible').checked
     }]);
     if (error) throw error;
-    showToast('Image uploaded successfully!', 'success');
+    showToast('Media uploaded successfully!', 'success');
     closeModal();
     loadMediaAssets();
   } catch (err) {
     console.error('Save media error:', err);
-    showToast('Failed to upload image: ' + (err.message || 'Unknown error'), 'error');
+    showToast('Failed to upload media: ' + (err.message || 'Unknown error'), 'error');
     setButtonLoading(btn, false, originalHTML);
   }
 }

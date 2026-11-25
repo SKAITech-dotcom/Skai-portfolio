@@ -220,6 +220,22 @@ function initContactForm() {
         status: 'new'
       });
       showToast('Your inquiry has been sent successfully! We\'ll get back to you within 24 hours.', 'success', 5000);
+      const emailDraft = document.getElementById('contact-email-draft');
+      if (emailDraft) {
+        const subject = encodeURIComponent('New project inquiry from ' + name);
+        const body = encodeURIComponent([
+          'Name: ' + name,
+          'Email: ' + email,
+          'Phone: ' + (document.getElementById('inquiry-phone').value.trim() || 'Not provided'),
+          'Company: ' + (document.getElementById('inquiry-company').value.trim() || 'Not provided'),
+          'Service: ' + (document.getElementById('inquiry-service').value || 'Not specified'),
+          'Budget: ' + (document.getElementById('inquiry-budget').value || 'Not specified'),
+          '',
+          message
+        ].join('\\n'));
+        emailDraft.href = 'mailto:skaitech360@gmail.com?subject=' + subject + '&body=' + body;
+        emailDraft.classList.remove('hidden');
+      }
       form.reset();
     } catch (error) {
       console.error('Error submitting inquiry:', error);
@@ -278,10 +294,14 @@ async function loadContactInfo() {
     const contact = await fetchSiteSetting('contact');
     if (contact) {
       setTextContent('contact-email', contact.email);
+      const contactEmail = document.getElementById('contact-email');
+      if (contactEmail && contact.email) contactEmail.href = 'mailto:' + contact.email;
       setTextContent('contact-phone', contact.phone);
       setTextContent('contact-address', contact.address);
       setTextContent('contact-hours', contact.working_hours);
       setTextContent('footer-email', contact.email);
+      const footerEmail = document.getElementById('footer-email');
+      if (footerEmail && contact.email) footerEmail.href = 'mailto:' + contact.email;
       setTextContent('footer-phone', contact.phone);
       setTextContent('footer-address', contact.address);
     }
@@ -309,7 +329,7 @@ async function loadBrandContent() {
     const brand = await fetchSiteSetting('brand');
     if (!brand) return;
 
-    const brandName = brand.brand_name || 'SkaiTechgh';
+    const brandName = brand.brand_name || 'SkaiTech Solutions';
     const brandNameEl = document.getElementById('site-brand-name');
     const footerBrandNameEl = document.getElementById('footer-brand-name');
     if (brandNameEl) brandNameEl.textContent = brandName;
@@ -417,6 +437,9 @@ function renderFlagshipProjects(projects) {
     const linkHTML = link
       ? '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 ' + accent.text + ' hover:text-white font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>'
       : '';
+    const videoHTML = project.video_url
+      ? '<a href="' + escapeHTML(project.video_url) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-accent-400 hover:text-white font-semibold transition-colors ml-4"><i class="fas fa-play-circle"></i> Watch Video</a>'
+      : '';
 
     return '<div class="glass-card p-8 lg:p-10 relative group reveal delay-' + (((index % 3) + 1) * 100) + '">' +
       '<div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>' +
@@ -426,7 +449,7 @@ function renderFlagshipProjects(projects) {
         '<p class="text-slate-400 mb-6 leading-relaxed">' + escapeHTML(project.short_description || project.description || '') + '</p>' +
         (highlightsHTML ? '<div class="space-y-3 mb-8">' + highlightsHTML + '</div>' : '') +
         (techHTML ? '<div class="flex flex-wrap gap-2 mb-8">' + techHTML + '</div>' : '') +
-        linkHTML +
+        linkHTML + videoHTML +
       '</div>' +
     '</div>';
   }).join('');
@@ -567,6 +590,10 @@ function renderProjects(projects) {
     if (project.app_store_url) {
       linksHTML += '<a href="' + escapeHTML(project.app_store_url) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-white font-medium transition-colors">' +
         '<i class="fab fa-apple text-xs"></i> App Store</a>';
+    }
+    if (project.video_url) {
+      linksHTML += '<a href="' + escapeHTML(project.video_url) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-accent-400 hover:text-accent-300 font-medium transition-colors mr-3">' +
+        '<i class="fas fa-play-circle text-xs"></i> Watch Video</a>';
     }
 
     var flagshipStar = project.is_flagship ? '<div class="absolute top-3 right-3"><span class="text-amber-400"><i class="fas fa-star"></i></span></div>' : '';

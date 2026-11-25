@@ -258,10 +258,12 @@ async function loadAllContent() {
     loadSocialLinks(),
     loadStats(),
     loadBrandContent(),
+    loadAboutContent(),
     loadFooterContent(),
     loadFlagshipContent(),
     loadServicesContent(),
     loadProjects(),
+    loadPublicMedia(),
     loadTeamMembers(),
     loadTestimonials()
   ]);
@@ -375,6 +377,52 @@ async function loadFooterContent() {
   }
 }
 
+async function loadAboutContent() {
+  try {
+    const about = await fetchSiteSetting('about');
+    if (!about) return;
+    const title = document.getElementById('about-title');
+    const description = document.getElementById('about-description');
+    if (title) title.textContent = about.title || 'About SkaiTech Solutions';
+    if (description) description.textContent = about.description || '';
+  } catch (err) {
+    console.warn('Could not load about content:', err);
+  }
+}
+
+async function loadPublicMedia() {
+  const section = document.getElementById('media-gallery');
+  const container = document.getElementById('media-gallery-container');
+  if (!section || !container) return;
+
+  try {
+    const media = await fetchMediaAssets();
+    if (!media || media.length === 0) return;
+
+    const navLinks = [document.getElementById('media-nav-link'), document.getElementById('mobile-media-nav-link')];
+    section.classList.remove('hidden');
+    navLinks.forEach(link => { if (link) link.classList.remove('hidden'); });
+    container.innerHTML = media.map(function(asset, index) {
+      const url = asset.file_url && asset.file_url.startsWith('http')
+        ? asset.file_url
+        : getStorageUrl('site-media', asset.file_url);
+      if (!url) return '';
+      const isVideo = asset.media_type === 'video' || /\.(mp4|webm|ogg|mov)(?:[?#]|$)/i.test(url);
+      const mediaHTML = isVideo
+        ? '<video src="' + escapeHTML(url) + '" controls preload="metadata" class="w-full h-64 object-cover" aria-label="' + escapeHTML(asset.alt_text || asset.name) + '"></video>'
+        : '<img src="' + escapeHTML(url) + '" alt="' + escapeHTML(asset.alt_text || asset.name) + '" class="w-full h-64 object-cover" loading="lazy">';
+      return '<article class="glass-card overflow-hidden reveal delay-' + (((index % 3) + 1) * 100) + '">' +
+        mediaHTML +
+        '<div class="p-5"><h3 class="font-semibold text-white">' + escapeHTML(asset.name) + '</h3>' +
+        (asset.alt_text ? '<p class="text-slate-400 text-sm mt-1">' + escapeHTML(asset.alt_text) + '</p>' : '') +
+        '</div></article>';
+    }).join('');
+    initScrollReveal();
+  } catch (err) {
+    console.warn('Could not load public media:', err);
+  }
+}
+
 function updateSocialLinks(containerId, social) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -428,6 +476,13 @@ function renderFlagshipProjects(projects) {
     const image = imageUrl
       ? '<img src="' + escapeHTML(imageUrl) + '" alt="' + escapeHTML(project.title) + '" class="w-full h-48 object-cover rounded-2xl mb-6" loading="lazy">'
       : '';
+    const galleryImages = Array.isArray(project.images) ? project.images.filter(Boolean).slice(0, 4) : [];
+    const galleryHTML = galleryImages.length
+      ? '<div class="grid grid-cols-2 gap-2 mb-6">' + galleryImages.map(function(imagePath) {
+          const url = imagePath.startsWith('http') ? imagePath : getStorageUrl('project-images', imagePath);
+          return '<img src="' + escapeHTML(url) + '" alt="' + escapeHTML(project.title) + ' project image" class="w-full h-24 object-cover rounded-lg" loading="lazy">';
+        }).join('') + '</div>'
+      : '';
     const highlightsHTML = highlights.map(function(item) {
       return '<div class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check-circle text-green-400"></i><span>' + escapeHTML(item) + '</span></div>';
     }).join('');
@@ -443,7 +498,7 @@ function renderFlagshipProjects(projects) {
 
     return '<div class="glass-card p-8 lg:p-10 relative group reveal delay-' + (((index % 3) + 1) * 100) + '">' +
       '<div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>' +
-      '<div class="relative z-10">' + image +
+      '<div class="relative z-10">' + image + galleryHTML +
         '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br ' + accent.card + ' flex items-center justify-center mb-6 shadow-lg ' + accent.shadow + '"><i class="' + escapeHTML(icon) + ' text-2xl text-white"></i></div>' +
         '<h3 class="text-2xl lg:text-3xl font-bold mb-3">' + escapeHTML(project.title) + '</h3>' +
         '<p class="text-slate-400 mb-6 leading-relaxed">' + escapeHTML(project.short_description || project.description || '') + '</p>' +
@@ -572,6 +627,13 @@ function renderProjects(projects) {
     var thumbnailHTML = thumbnailUrl
       ? '<img src="' + escapeHTML(thumbnailUrl) + '" alt="' + escapeHTML(project.title) + '" class="thumbnail" loading="lazy">'
       : '<div class="w-full h-[220px] bg-gradient-to-br ' + gradient + ' flex items-center justify-center"><i class="fas ' + icon + ' text-5xl text-white/20"></i></div>';
+    var galleryImages = Array.isArray(project.images) ? project.images.filter(Boolean).slice(0, 4) : [];
+    var galleryHTML = galleryImages.length
+      ? '<div class="grid grid-cols-2 gap-2 mb-4">' + galleryImages.map(function(imagePath) {
+          var url = imagePath.startsWith('http') ? imagePath : getStorageUrl('project-images', imagePath);
+          return '<img src="' + escapeHTML(url) + '" alt="' + escapeHTML(project.title) + ' project image" class="w-full h-24 object-cover rounded-lg" loading="lazy">';
+        }).join('') + '</div>'
+      : '';
 
     var techStackHTML = (project.tech_stack || []).slice(0, 4).map(function(tech) {
       return '<span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-slate-400 font-medium">' + escapeHTML(tech) + '</span>';
@@ -608,7 +670,7 @@ function renderProjects(projects) {
         '</div>' +
         flagshipStar +
       '</div>' +
-      '<div class="p-6">' +
+      '<div class="p-6">' + galleryHTML +
         '<h3 class="text-lg font-bold mb-2">' + escapeHTML(project.title) + '</h3>' +
         '<p class="text-slate-400 text-sm mb-4 line-clamp-2">' + escapeHTML(project.short_description || project.description || '') + '</p>' +
         '<div class="flex flex-wrap gap-1.5 mb-4">' + techStackHTML + '</div>' +

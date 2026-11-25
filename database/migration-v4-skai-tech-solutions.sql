@@ -38,6 +38,16 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON media_assets
   FOR EACH ROW EXECUTE FUNCTION trigger_set_updated_at();
 
 INSERT INTO site_settings (key, value) VALUES
+  ('hero', '{
+    "headline": "We Build Digital Experiences That Drive Growth",
+    "subheadline": "SkaiTech Solutions is a software engineering team crafting websites, mobile apps, and digital platforms for businesses across Ghana and beyond.",
+    "cta_primary": "Explore Our Work",
+    "cta_secondary": "Start a Project"
+  }'::jsonb),
+  ('about', '{
+    "title": "About SkaiTech Solutions",
+    "description": "We build innovative websites, mobile apps, and digital platforms that help businesses grow."
+  }'::jsonb),
   ('brand', '{
     "brand_name": "SkaiTech Solutions",
     "tagline": "Digital products that drive growth",

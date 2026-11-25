@@ -8,6 +8,8 @@ The public portfolio is backed by Supabase and the `/admin/` dashboard controls 
 - Project thumbnails, galleries, app-store links, icons, highlights, visibility, status, and ordering.
 - Services, team members, testimonials, inquiries, hero copy, contact details, social links, stats, and footer copy.
 - A reusable **Media Library** for uploaded images and videos.
+- Visible Media Library assets appear automatically in the public **Gallery** section.
+- Project gallery images and the About settings are rendered on the public site.
 - Brand name, logo, favicon, and logo alt text through **Brand & Logo** settings.
 - Contact inquiries are saved in Supabase and can also open a pre-filled email to `skaitech360@gmail.com`.
 

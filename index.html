@@ -82,8 +82,10 @@
         <div class="hidden lg:flex items-center gap-1">
           <a href="#hero" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Home</a>
           <a href="#products" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Products</a>
+          <a href="#about" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">About</a>
           <a href="#services" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Services</a>
           <a href="#portfolio" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Portfolio</a>
+          <a id="media-nav-link" href="#media-gallery" class="nav-link hidden px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Gallery</a>
           <a href="#team" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Team</a>
           <a href="#contact" class="nav-link px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Contact</a>
         </div>
@@ -106,8 +108,10 @@
       <div class="px-4 py-4 space-y-1 bg-slate-900/95 backdrop-blur-xl">
         <a href="#hero" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Home</a>
         <a href="#products" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Products</a>
+        <a href="#about" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">About</a>
         <a href="#services" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Services</a>
         <a href="#portfolio" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Portfolio</a>
+        <a id="mobile-media-nav-link" href="#media-gallery" class="hidden block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Gallery</a>
         <a href="#team" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Team</a>
         <a href="#contact" class="block px-4 py-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all font-medium">Contact</a>
         <div class="pt-2">
@@ -246,6 +250,20 @@
   </section>
 
   <!-- ============================================ -->
+  <!-- ABOUT SECTION                                -->
+  <!-- ============================================ -->
+  <section id="about" class="py-24 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-accent-500/5 to-transparent pointer-events-none"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-info-circle text-xs"></i> About Us</span>
+        <h2 id="about-title" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6">About SkaiTech Solutions</h2>
+        <p id="about-description" class="text-slate-400 text-lg leading-relaxed">We build innovative websites, mobile apps, and digital platforms that help businesses grow.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
   <!-- PORTFOLIO / CASE STUDIES SECTION             -->
   <!-- ============================================ -->
   <section id="portfolio" class="py-24 relative">
@@ -270,6 +288,20 @@
           <p class="text-slate-500 text-sm">Loading projects...</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- PUBLIC MEDIA GALLERY SECTION                 -->
+  <!-- ============================================ -->
+  <section id="media-gallery" class="hidden py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="section-heading reveal">
+        <span class="label"><i class="fas fa-photo-video text-xs"></i> Gallery</span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Our <span class="gradient-text">Media</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Photos and videos shared by SkaiTech Solutions.</p>
+      </div>
+      <div id="media-gallery-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
   </section>
 
@@ -469,7 +501,7 @@
   </button>
 
   <!-- Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/config.js?v=media-sync-1"></script>
+  <script src="js/app.js?v=media-sync-1"></script>
 </body>
 </html>

@@ -489,6 +489,10 @@ function renderFlagshipProjects(projects) {
     const techHTML = techStack.map(function(tech) {
       return '<span class="px-3 py-1 rounded-full bg-primary-600/10 border border-primary-500/20 text-primary-300 text-xs font-medium">' + escapeHTML(tech) + '</span>';
     }).join('');
+    const destination = project.live_url || project.play_store_url || project.app_store_url || project.video_url;
+    const projectAttrs = destination
+      ? ' data-project-url="' + escapeHTML(destination) + '" role="link" tabindex="0" onclick="openProjectFromCard(event, this)" onkeydown="openProjectFromCardKey(event, this)"'
+      : '';
     const linkHTML = link
       ? '<a href="' + escapeHTML(link) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 ' + accent.text + ' hover:text-white font-semibold transition-colors group/link">Visit Platform <i class="fas fa-arrow-right text-sm group-hover/link:translate-x-1 transition-transform"></i></a>'
       : '';
@@ -496,7 +500,7 @@ function renderFlagshipProjects(projects) {
       ? '<a href="' + escapeHTML(project.video_url) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-accent-400 hover:text-white font-semibold transition-colors ml-4"><i class="fas fa-play-circle"></i> Watch Video</a>'
       : '';
 
-    return '<div class="glass-card p-8 lg:p-10 relative group reveal delay-' + (((index % 3) + 1) * 100) + '">' +
+    return '<div class="glass-card p-8 lg:p-10 relative group reveal delay-' + (((index % 3) + 1) * 100) + (destination ? ' cursor-pointer' : '') + '"' + projectAttrs + '>' +
       '<div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary-600/10 to-transparent rounded-full blur-2xl -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>' +
       '<div class="relative z-10">' + image + galleryHTML +
         '<div class="w-16 h-16 rounded-2xl bg-gradient-to-br ' + accent.card + ' flex items-center justify-center mb-6 shadow-lg ' + accent.shadow + '"><i class="' + escapeHTML(icon) + ' text-2xl text-white"></i></div>' +
@@ -638,6 +642,10 @@ function renderProjects(projects) {
     var techStackHTML = (project.tech_stack || []).slice(0, 4).map(function(tech) {
       return '<span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-slate-400 font-medium">' + escapeHTML(tech) + '</span>';
     }).join('');
+    var destination = project.live_url || project.play_store_url || project.app_store_url || project.video_url;
+    var projectAttrs = destination
+      ? ' data-project-url="' + escapeHTML(destination) + '" role="link" tabindex="0" onclick="openProjectFromCard(event, this)" onkeydown="openProjectFromCardKey(event, this)"'
+      : '';
 
     // Build links — Live URL, Play Store, App Store
     var linksHTML = '';
@@ -660,7 +668,7 @@ function renderProjects(projects) {
 
     var flagshipStar = project.is_flagship ? '<div class="absolute top-3 right-3"><span class="text-amber-400"><i class="fas fa-star"></i></span></div>' : '';
 
-    return '<div class="glass-card overflow-hidden reveal delay-' + (((index % 3) + 1) * 100) + '" style="animation: fadeInUp 0.5s ease ' + (index * 0.1) + 's forwards; opacity: 0;">' +
+    return '<div class="glass-card overflow-hidden reveal delay-' + (((index % 3) + 1) * 100) + (destination ? ' cursor-pointer' : '') + '"' + projectAttrs + ' style="animation: fadeInUp 0.5s ease ' + (index * 0.1) + 's forwards; opacity: 0;">' +
       '<div class="relative overflow-hidden">' +
         thumbnailHTML +
         '<div class="absolute top-3 left-3">' +
@@ -689,6 +697,18 @@ function renderProjectsFallback() {
   ];
   allProjects = fallbackProjects;
   renderProjects(fallbackProjects);
+}
+
+function openProjectFromCard(event, card) {
+  if (event.target.closest('a,button,input,video')) return;
+  const url = card?.dataset?.projectUrl;
+  if (url) window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function openProjectFromCardKey(event, card) {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  openProjectFromCard(event, card);
 }
 
 // ---- Team Members ----

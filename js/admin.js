@@ -912,6 +912,17 @@ async function openProjectModal(projectId) {
         </div>
       </div>
 
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="form-label">Google Play URL</label>
+          <input type="url" id="proj-play-store-url" class="form-input" value="${escapeHtml(project?.play_store_url || '')}" placeholder="https://play.google.com/store/apps/...">
+        </div>
+        <div>
+          <label class="form-label">App Store URL</label>
+          <input type="url" id="proj-app-store-url" class="form-input" value="${escapeHtml(project?.app_store_url || '')}" placeholder="https://apps.apple.com/app/...">
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label class="form-label">Display Order</label>
@@ -920,8 +931,8 @@ async function openProjectModal(projectId) {
         <div>
           <label class="form-label">Status</label>
           <select id="proj-status" class="form-input">
-            <option value="published" ${project?.status === 'published' ? 'selected' : ''}>Published</option>
-            <option value="draft" ${(project?.status === 'draft' || !project) ? 'selected' : ''}>Draft</option>
+            <option value="published" ${(project?.status === 'published' || !project) ? 'selected' : ''}>Published</option>
+            <option value="draft" ${project?.status === 'draft' ? 'selected' : ''}>Draft</option>
           </select>
         </div>
         <div class="flex items-center gap-3 pt-6">
@@ -1113,6 +1124,8 @@ async function saveProject(e) {
       live_url: document.getElementById('proj-live-url').value.trim(),
       video_url: document.getElementById('proj-video-url').value.trim(),
       github_url: document.getElementById('proj-github-url').value.trim(),
+      play_store_url: document.getElementById('proj-play-store-url').value.trim(),
+      app_store_url: document.getElementById('proj-app-store-url').value.trim(),
       icon: document.getElementById('proj-icon').value.trim() || 'fas fa-code',
       highlights: document.getElementById('proj-highlights').value.split(',').map(t => t.trim()).filter(Boolean),
       display_order: parseInt(document.getElementById('proj-order').value) || 0,

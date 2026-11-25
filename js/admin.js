@@ -18,6 +18,7 @@ let editingService = null;
 let editingMedia = null;
 let viewingInquiry = null;
 let siteSettingsCache = {};
+let removedTeamPhoto = false;
 
 // ============================================
 // INITIALIZATION
@@ -527,6 +528,7 @@ async function toggleTeamVisibility(id, newValue) {
 }
 
 async function openTeamModal(memberId) {
+  removedTeamPhoto = false;
   let member = null;
   if (memberId) {
     try {
@@ -564,7 +566,8 @@ async function openTeamModal(memberId) {
         <label class="form-label">Photo</label>
         <div class="file-upload-area" id="team-photo-upload" onclick="document.getElementById('team-photo-input').click()">
           ${photoUrl
-            ? `<img src="${escapeHtml(photoUrl)}" id="team-photo-preview" alt="Current photo" class="mx-auto">`
+            ? `<img src="${escapeHtml(photoUrl)}" id="team-photo-preview" alt="Current photo" class="mx-auto">
+               <button type="button" class="btn-sm btn-delete mt-2" onclick="event.stopPropagation(); removeTeamPhoto()"><i class="fas fa-trash"></i> Remove</button>`
             : `<div id="team-photo-preview-placeholder"><i class="fas fa-cloud-upload-alt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop to upload photo</p><p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB</p></div>`
           }
         </div>
@@ -635,6 +638,7 @@ async function openTeamModal(memberId) {
 
 function previewTeamPhoto(input) {
   if (input.files && input.files[0]) {
+    removedTeamPhoto = false;
     const reader = new FileReader();
     reader.onload = (e) => {
       const area = document.getElementById('team-photo-upload');
@@ -645,6 +649,14 @@ function previewTeamPhoto(input) {
   }
 }
 
+function removeTeamPhoto() {
+  removedTeamPhoto = true;
+  const input = document.getElementById('team-photo-input');
+  if (input) input.value = '';
+  const area = document.getElementById('team-photo-upload');
+  if (area) area.innerHTML = '<div id="team-photo-preview-placeholder"><i class="fas fa-cloud-upload-alt text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop to upload photo</p><p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB</p></div>';
+}
+
 async function saveTeamMember(e) {
   e.preventDefault();
   const btn = document.getElementById('team-save-btn');
@@ -653,7 +665,7 @@ async function saveTeamMember(e) {
 
   try {
     const photoInput = document.getElementById('team-photo-input');
-    let photoUrl = editingTeamMember?.photo_url || null;
+    let photoUrl = removedTeamPhoto ? null : (editingTeamMember?.photo_url || null);
 
     // Upload photo if new file selected
     if (photoInput.files && photoInput.files[0]) {
@@ -683,6 +695,11 @@ async function saveTeamMember(e) {
         .update(memberData)
         .eq('id', editingTeamMember.id);
       if (error) throw error;
+      const oldPhotoPath = getStoragePath('team-avatars', editingTeamMember.photo_url);
+      const newPhotoPath = getStoragePath('team-avatars', photoUrl);
+      if (oldPhotoPath && oldPhotoPath !== newPhotoPath) {
+        try { await deleteFile('team-avatars', oldPhotoPath); } catch (e) { console.warn('Failed to delete replaced photo:', e); }
+      }
       showToast('Team member updated successfully!', 'success');
     } else {
       // Insert
@@ -708,9 +725,10 @@ async function deleteTeamMember(id, photoPath) {
 
   try {
     // Delete photo from storage if exists
-    if (photoPath && !photoPath.startsWith('http')) {
+    const storagePath = getStoragePath('team-avatars', photoPath);
+    if (storagePath) {
       try {
-        await deleteFile('team-avatars', photoPath);
+        await deleteFile('team-avatars', storagePath);
       } catch (e) {
         console.warn('Failed to delete photo from storage:', e);
       }
@@ -796,6 +814,7 @@ async function loadProjects() {
 async function openProjectModal(projectId) {
   newProjectImages = [];
   removedProjectImages = [];
+  removedProjectThumbnail = false;
   let project = null;
   if (projectId) {
     try {
@@ -917,7 +936,8 @@ async function openProjectModal(projectId) {
         <div class="file-upload-area" id="proj-thumb-upload" onclick="document.getElementById('proj-thumb-input').click()">
           ${thumbUrl
             ? `<img src="${escapeHtml(thumbUrl)}" id="proj-thumb-preview" alt="Thumbnail" class="mx-auto max-h-28 rounded-lg">
-               <p class="text-xs text-slate-400 mt-2">Click to change</p>`
+               <p class="text-xs text-slate-400 mt-2">Click to change</p>
+               <button type="button" class="btn-sm btn-delete mt-2" onclick="event.stopPropagation(); removeProjectThumbnail()"><i class="fas fa-trash"></i> Remove</button>`
             : `<div id="proj-thumb-placeholder"><i class="fas fa-image text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop thumbnail</p><p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB</p></div>`
           }
         </div>
@@ -970,6 +990,7 @@ async function openProjectModal(projectId) {
 
 function previewProjectThumb(input) {
   if (input.files && input.files[0]) {
+    removedProjectThumbnail = false;
     const reader = new FileReader();
     reader.onload = (e) => {
       const area = document.getElementById('proj-thumb-upload');
@@ -983,6 +1004,15 @@ function previewProjectThumb(input) {
 // Store new images to upload
 let newProjectImages = [];
 let removedProjectImages = [];
+let removedProjectThumbnail = false;
+
+function removeProjectThumbnail() {
+  removedProjectThumbnail = true;
+  const input = document.getElementById('proj-thumb-input');
+  if (input) input.value = '';
+  const area = document.getElementById('proj-thumb-upload');
+  if (area) area.innerHTML = '<div id="proj-thumb-placeholder"><i class="fas fa-image text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop thumbnail</p><p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB</p></div>';
+}
 
 function previewProjectImages(input) {
   const previewGrid = document.getElementById('proj-images-preview');
@@ -1034,7 +1064,7 @@ async function saveProject(e) {
   setButtonLoading(btn, true);
 
   try {
-    let thumbnailUrl = editingProject?.thumbnail_url || null;
+    let thumbnailUrl = removedProjectThumbnail ? null : (editingProject?.thumbnail_url || null);
     const thumbInput = document.getElementById('proj-thumb-input');
 
     // Upload thumbnail if new file selected
@@ -1052,8 +1082,9 @@ async function saveProject(e) {
     // Remove deleted images
     for (const removedPath of removedProjectImages) {
       images = images.filter(img => img !== removedPath);
-      if (!removedPath.startsWith('http')) {
-        try { await deleteFile('project-images', removedPath); } catch (e) { console.warn('Failed to delete image:', e); }
+      const storagePath = getStoragePath('project-images', removedPath);
+      if (storagePath) {
+        try { await deleteFile('project-images', storagePath); } catch (e) { console.warn('Failed to delete image:', e); }
       }
     }
 
@@ -1097,6 +1128,11 @@ async function saveProject(e) {
         .update(projectData)
         .eq('id', editingProject.id);
       if (error) throw error;
+      const oldThumbnailPath = getStoragePath('project-images', editingProject.thumbnail_url);
+      const newThumbnailPath = getStoragePath('project-images', thumbnailUrl);
+      if (oldThumbnailPath && oldThumbnailPath !== newThumbnailPath) {
+        try { await deleteFile('project-images', oldThumbnailPath); } catch (e) { console.warn('Failed to delete replaced thumbnail:', e); }
+      }
       showToast('Project updated successfully!', 'success');
     } else {
       const { error } = await window._supabase
@@ -1134,12 +1170,14 @@ async function deleteProject(id) {
     // Delete images from storage
     if (proj) {
       const pathsToDelete = [];
-      if (proj.thumbnail_url && !proj.thumbnail_url.startsWith('http')) {
-        pathsToDelete.push(proj.thumbnail_url);
+      const thumbnailPath = getStoragePath('project-images', proj.thumbnail_url);
+      if (thumbnailPath) {
+        pathsToDelete.push(thumbnailPath);
       }
       if (Array.isArray(proj.images)) {
         proj.images.forEach(img => {
-          if (img && !img.startsWith('http')) pathsToDelete.push(img);
+          const imagePath = getStoragePath('project-images', img);
+          if (imagePath) pathsToDelete.push(imagePath);
         });
       }
       if (pathsToDelete.length > 0) {
@@ -1285,8 +1323,9 @@ async function deleteMediaAsset(id, filePath) {
   try {
     const { error } = await window._supabase.from('media_assets').delete().eq('id', id);
     if (error) throw error;
-    if (filePath) {
-      try { await deleteFile('site-media', filePath); } catch (storageError) { console.warn('Storage cleanup failed:', storageError); }
+    const storagePath = getStoragePath('site-media', filePath);
+    if (storagePath) {
+      try { await deleteFile('site-media', storagePath); } catch (storageError) { console.warn('Storage cleanup failed:', storageError); }
     }
     showToast('Media deleted.', 'success');
     loadMediaAssets();
@@ -1733,8 +1772,8 @@ async function loadSiteSettings() {
       setInputValue('setting-brand-name', brand.brand_name);
       setInputValue('setting-brand-tagline', brand.tagline);
       setInputValue('setting-brand-logo_alt', brand.logo_alt);
-      renderBrandPreview('brand-logo-preview', brand.logo_url, 'Current logo');
-      renderBrandPreview('brand-favicon-preview', brand.favicon_url, 'Current favicon');
+      renderBrandPreview('brand-logo-preview', brand.logo_url, 'Current logo', 'logo');
+      renderBrandPreview('brand-favicon-preview', brand.favicon_url, 'Current favicon', 'favicon');
     }
 
     // Hero settings
@@ -1788,10 +1827,51 @@ async function loadSiteSettings() {
   }
 }
 
-function renderBrandPreview(id, url, label) {
+function renderBrandPreview(id, url, label, type) {
   const container = document.getElementById(id);
   if (!container || !url) return;
-  container.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(label)}" class="mx-auto max-h-24 rounded-lg object-contain"><p class="text-xs text-slate-400 mt-2">${escapeHtml(label)} — click to change</p>`;
+  container.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(label)}" class="mx-auto max-h-24 rounded-lg object-contain"><p class="text-xs text-slate-400 mt-2">${escapeHtml(label)} — click to change</p><button type="button" class="btn-sm btn-delete mt-2" onclick="event.stopPropagation(); removeBrandAsset('${type}')"><i class="fas fa-trash"></i> Remove</button>`;
+}
+
+function resetBrandPreview(id, type) {
+  const container = document.getElementById(id);
+  if (!container) return;
+  const icon = type === 'favicon' ? 'fa-bolt' : 'fa-image';
+  const label = type === 'favicon' ? 'favicon' : 'logo';
+  container.innerHTML = `<i class="fas ${icon} text-2xl mb-2 block"></i><p class="text-sm">Click or drag & drop ${label}</p><p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP, SVG up to 10MB</p>`;
+}
+
+async function removeBrandAsset(type) {
+  if (!confirm(`Remove this ${type} from the site?`)) return;
+
+  const urlKey = type === 'favicon' ? 'favicon_url' : 'logo_url';
+  const pathKey = type === 'favicon' ? 'favicon_path' : 'logo_path';
+  const previewId = type === 'favicon' ? 'brand-favicon-preview' : 'brand-logo-preview';
+  const inputId = type === 'favicon' ? 'brand-favicon-input' : 'brand-logo-input';
+  const brand = { ...(siteSettingsCache.brand || {}) };
+
+  try {
+    const storagePath = getStoragePath('site-media', brand[pathKey] || brand[urlKey]);
+    if (storagePath) {
+      try { await deleteFile('site-media', storagePath); } catch (e) { console.warn('Failed to delete brand file from storage:', e); }
+    }
+
+    brand[urlKey] = '';
+    brand[pathKey] = '';
+    const { error } = await window._supabase
+      .from('site_settings')
+      .upsert({ key: 'brand', value: brand }, { onConflict: 'key' });
+    if (error) throw error;
+
+    siteSettingsCache.brand = brand;
+    const input = document.getElementById(inputId);
+    if (input) input.value = '';
+    resetBrandPreview(previewId, type);
+    showToast(`${type === 'favicon' ? 'Favicon' : 'Logo'} removed.`, 'success');
+  } catch (err) {
+    console.error('Remove brand asset error:', err);
+    showToast('Failed to remove brand asset: ' + (err.message || 'Unknown error'), 'error');
+  }
 }
 
 function previewBrandImage(input, previewId) {
@@ -1837,6 +1917,10 @@ async function saveSettingsGroup(group) {
 
   try {
     let value = {};
+    let oldLogoPath = null;
+    let oldFaviconPath = null;
+    let logoReplaced = false;
+    let faviconReplaced = false;
 
     switch (group) {
       case 'hero':
@@ -1875,6 +1959,8 @@ async function saveSettingsGroup(group) {
         let logoPath = previous.logo_path || '';
         let faviconUrl = previous.favicon_url || '';
         let faviconPath = previous.favicon_path || '';
+        oldLogoPath = getStoragePath('site-media', previous.logo_path || previous.logo_url);
+        oldFaviconPath = getStoragePath('site-media', previous.favicon_path || previous.favicon_url);
         const logoInput = document.getElementById('brand-logo-input');
         const faviconInput = document.getElementById('brand-favicon-input');
 
@@ -1882,11 +1968,13 @@ async function saveSettingsGroup(group) {
           const file = logoInput.files[0];
           logoPath = `brand/logo_${generateUUID()}.${getFileExtension(file.name)}`;
           logoUrl = await uploadFile('site-media', logoPath, file);
+          logoReplaced = true;
         }
         if (faviconInput.files && faviconInput.files[0]) {
           const file = faviconInput.files[0];
           faviconPath = `brand/favicon_${generateUUID()}.${getFileExtension(file.name)}`;
           faviconUrl = await uploadFile('site-media', faviconPath, file);
+          faviconReplaced = true;
         }
 
         value = {
@@ -1924,6 +2012,16 @@ async function saveSettingsGroup(group) {
     if (error) throw error;
 
     siteSettingsCache[group] = value;
+    if (group === 'brand') {
+      if (logoReplaced && oldLogoPath && oldLogoPath !== value.logo_path) {
+        try { await deleteFile('site-media', oldLogoPath); } catch (e) { console.warn('Failed to delete replaced logo:', e); }
+      }
+      if (faviconReplaced && oldFaviconPath && oldFaviconPath !== value.favicon_path) {
+        try { await deleteFile('site-media', oldFaviconPath); } catch (e) { console.warn('Failed to delete replaced favicon:', e); }
+      }
+      renderBrandPreview('brand-logo-preview', value.logo_url, 'Current logo', 'logo');
+      renderBrandPreview('brand-favicon-preview', value.favicon_url, 'Current favicon', 'favicon');
+    }
 
     showToast(`${group.charAt(0).toUpperCase() + group.slice(1)} settings saved successfully!`, 'success');
   } catch (err) {

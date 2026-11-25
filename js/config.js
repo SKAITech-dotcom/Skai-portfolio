@@ -35,6 +35,18 @@ function getStorageUrl(bucket, path) {
 }
 
 /**
+ * Convert either a stored path or a public Storage URL back to a path.
+ * Uploads store public URLs in content tables, while Storage.delete needs a path.
+ */
+function getStoragePath(bucket, value) {
+  if (!value) return null;
+  if (!value.startsWith('http')) return value;
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const markerIndex = value.indexOf(marker);
+  return markerIndex === -1 ? null : decodeURIComponent(value.slice(markerIndex + marker.length));
+}
+
+/**
  * Upload a file to Supabase Storage
  */
 async function uploadFile(bucket, path, file) {

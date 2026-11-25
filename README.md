@@ -20,7 +20,9 @@ Run these SQL files in the Supabase SQL Editor, in order:
 3. `database/migration-v3-content-control.sql`
 4. `database/migration-v4-skai-tech-solutions.sql`
 
-The third migration creates the `media_assets` table, adds project presentation fields, seeds the content-control settings, and creates the public storage buckets plus authenticated upload policies. The fourth migration sets the SkaiTech Solutions contact details, adds project video links, and enables common image/video uploads up to 50MB.
+The third migration creates the `media_assets` table, adds project presentation fields, seeds the content-control settings, and creates the public storage buckets plus authenticated upload policies. The fourth migration is self-contained for the admin repair: it safely creates any missing media table, project fields, storage buckets, policies, SkaiTech Solutions contact details, and common image/video uploads up to 50MB.
+
+If `schema.sql` and `migration-v2.sql` are already applied, running `migration-v4-skai-tech-solutions.sql` is enough to repair the current admin dashboard. It can be run safely whether or not migration v3 was previously applied.
 
 The admin login uses Supabase Auth. Confirm `skaitech360@gmail.com` in Supabase Auth before signing in at `/admin/`; the password is intentionally not stored in this repository.
 

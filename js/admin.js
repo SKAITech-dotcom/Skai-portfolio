@@ -883,7 +883,7 @@ async function openProjectModal(projectId) {
 
       <div class="mb-4">
         <label class="form-label">Full Description</label>
-        <textarea id="proj-full-desc" class="form-input" rows="4" placeholder="Detailed project description...">${escapeHtml(project?.full_description || '')}</textarea>
+        <textarea id="proj-full-desc" class="form-input" rows="4" placeholder="Detailed project description...">${escapeHtml(project?.description || '')}</textarea>
       </div>
 
       <div class="mb-4">
@@ -1117,7 +1117,6 @@ async function saveProject(e) {
       title: document.getElementById('proj-title').value.trim(),
       short_description: document.getElementById('proj-short-desc').value.trim(),
       description: document.getElementById('proj-full-desc').value.trim(),
-      full_description: document.getElementById('proj-full-desc').value.trim(),
       client_challenge: document.getElementById('proj-challenge').value.trim(),
       category: document.getElementById('proj-category').value,
       tech_stack: techStack,
